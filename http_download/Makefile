@@ -3,7 +3,7 @@ cflags := -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-null-pointer-check
 default: compile link
 
 compile:
-	mipsisa64-octeon-elf-gcc $(cflags) -c http_download.c _stubs.c -o http_download.o
+	mipsisa64-octeon-elf-gcc $(cflags) -c http_download.c -o http_download.o
 
 link:
 	mipsisa64-octeon-elf-ld -T ../elf.ld http_download.o -o http_download
