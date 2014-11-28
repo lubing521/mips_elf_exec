@@ -23,7 +23,7 @@ OUTPUT_ARCH(mips)
 /*
  * 强制要求所有的MIPS平台都使用这个入口函数。
  */
-ENTRY(dynload_elf)
+ENTRY(dynload_entry)
 
 SECTIONS
 {

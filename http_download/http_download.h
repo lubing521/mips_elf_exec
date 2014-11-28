@@ -148,29 +148,29 @@ extern int http_dl_log_level;
 #define http_dl_log_info(fmt, arg...) \
     do { \
         if (http_dl_log_level >= 6) { \
-            printk_rt("*INFO*  %s: " fmt "\n", __func__, ##arg); \
+            printk("*INFO*  %s: " fmt "\n", __func__, ##arg); \
         } else { \
-            printk_rt(fmt "\n", ##arg); \
+            printk(fmt "\n", ##arg); \
         } \
     } while (0)
 
 #define http_dl_log_debug(fmt, arg...) \
     do { \
         if (http_dl_log_level >= 7) { \
-            printk_rt("*DEBUG* %s[%d]: " fmt "\n", __func__, __LINE__, ##arg); \
+            printk("*DEBUG* %s[%d]: " fmt "\n", __func__, __LINE__, ##arg); \
         } \
     } while (0)
         
 #define http_dl_log_error(fmt, arg...) \
     do { \
         if (http_dl_log_level >= 3) { \
-            printk_rt("*ERROR* %s[%d]: " fmt "\n", __func__, __LINE__, ##arg); \
+            printk("*ERROR* %s[%d]: " fmt "\n", __func__, __LINE__, ##arg); \
         } \
     } while (0)
 
 #define http_dl_print_raw(fmt, arg...) \
     do { \
-        printk_rt(fmt, ##arg); \
+        printk(fmt, ##arg); \
     } while(0)
 
 #ifndef malloc

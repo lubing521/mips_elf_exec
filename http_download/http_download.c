@@ -12,7 +12,7 @@
 
 #include "http_download.h"
 
-int http_dl_log_level = 6;
+int http_dl_log_level = 7;
 
 static char *http_dl_agent_string = "Mozilla/5.0 (Windows NT 6.1; WOW64) " \
                                     "AppleWebKit/537.36 (KHTML, like Gecko) " \
@@ -28,7 +28,7 @@ static int g_http_dl_ctrl_sockfd = -1;          /* 接收下载任务的套接字fd, UDP套
 static int g_http_dl_exit = 0;                  /* 退出select()循环的控制字段 */
 
 static task_t g_http_download_task = NULL;
-static task_t g_http_write_test_task = NULL;
+//static task_t g_http_write_test_task = NULL;
 
 /* Count the digits in a (long) integer.  */
 static int http_dl_numdigit(long a)
@@ -786,6 +786,34 @@ static int http_dl_header_dup_str_to_buf(const char *val, void *buf)
     return HTTP_DL_OK;
 }
 
+static int http_dl_strncasecmp(const char *s1, const char *s2, int n)
+{
+    unsigned int  c1, c2;
+
+    while (n) {
+        c1 = (unsigned int) *s1++;
+        c2 = (unsigned int) *s2++;
+
+        c1 = (c1 >= 'A' && c1 <= 'Z') ? (c1 | 0x20) : c1;
+        c2 = (c2 >= 'A' && c2 <= 'Z') ? (c2 | 0x20) : c2;
+
+        if (c1 == c2) {
+
+            if (c1) {
+                n--;
+                continue;
+            }
+
+            return 0;
+        }
+
+        return c1 - c2;
+    }
+
+    return 0;
+}
+
+
 /*
  * Content-Range: bytes 1113952-1296411/9570351
  * Content-Range: bytes 0-12903171/12903172
@@ -803,7 +831,7 @@ static int http_dl_header_parse_range(const char *hdr, void *arg)
     `Content-Length' without "bytes" specifier, which is a breach of
     RFC2068 (as well as the HTTP/1.1 draft which was current at the
     time).  But hell, I must support it...  */
-    if (strncasecmp(hdr, "bytes", 5) == 0) {
+    if (http_dl_strncasecmp(hdr, "bytes", 5) == 0) {
         hdr += 5;
         hdr += http_dl_clac_lws(hdr);
         if (!*hdr) {
@@ -1703,6 +1731,9 @@ err_out:
 
 static void http_download()
 {
+    printk("g_http_download_task <0x%8X>, value = 0x%8X\r\n", &g_http_download_task, g_http_download_task);
+    return;
+
     if (g_http_download_task != NULL) {
         http_dl_log_error("An http download task entity is already running...");
         return;
@@ -1720,7 +1751,6 @@ static void http_download()
 
     return;
 }
-DEFINE_DEBUG_FUNC(http_download, http_download);
 
 static void http_download_destroy()
 {
@@ -1739,6 +1769,22 @@ static void http_download_destroy()
 
     return;
 }
+
+/* ELF entry point for dynamic loading. */
+void dynload_entry()
+{
+    http_download();
+}
+
+/* ELF exit point for dynamic loading. */
+void dynload_exit()
+{
+    http_download_destroy();
+}
+
+#if 0
+
+DEFINE_DEBUG_FUNC(http_download, http_download);
 DEFINE_DEBUG_FUNC(http_download_destroy, http_download_destroy);
 
 static void http_download_log_level(int level)
@@ -1748,7 +1794,7 @@ static void http_download_log_level(int level)
     }
 }
 DEFINE_DEBUG_FUNC_WITH_ARG(http_download_log_level, http_download_log_level, SUPPORT_FUNC_INT);
-
+#endif
 
 
 
