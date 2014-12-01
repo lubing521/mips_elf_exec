@@ -1,23 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <string.h>
 
-typedef uint32_t addr_t; /* 目标设备的地址指针类型 */
+#include "utils.h"
 
 #define LINE_BUF_LEN    256
 #define SYMBOL_LEN      64
-
-#define BUG(fmt, arg...) \
-    do { \
-        fprintf(stderr, "*BUG* %s[%d]: " fmt "\n", __func__, __LINE__, ##arg); \
-        exit(-1); \
-    } while (0)
-
-#define ERR(fmt, arg...) \
-    do { \
-        fprintf(stderr, "*ERR* %s[%d]: " fmt "\n", __func__, __LINE__, ##arg); \
-    } while (0)
 
 static char sym_stub_file[] = "sym_stub.c";
 static char sym_stub_temp_file[] = "sym_stub.c.temp";

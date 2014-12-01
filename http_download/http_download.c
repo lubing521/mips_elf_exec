@@ -12,7 +12,7 @@
 
 #include "http_download.h"
 
-int http_dl_log_level = 7;
+int http_dl_log_level = 6;
 
 static char *http_dl_agent_string = "Mozilla/5.0 (Windows NT 6.1; WOW64) " \
                                     "AppleWebKit/537.36 (KHTML, like Gecko) " \
@@ -1731,9 +1731,6 @@ err_out:
 
 static void http_download()
 {
-    printk("g_http_download_task <0x%8X>, value = 0x%8X\r\n", &g_http_download_task, g_http_download_task);
-    return;
-
     if (g_http_download_task != NULL) {
         http_dl_log_error("An http download task entity is already running...");
         return;
