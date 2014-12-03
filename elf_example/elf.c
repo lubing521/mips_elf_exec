@@ -29,6 +29,8 @@ void dynload_elf()
 }
 #endif
 
+char global_var[1<<20];
+
 void dynload_entry()
 {
 //    func_type ptr;

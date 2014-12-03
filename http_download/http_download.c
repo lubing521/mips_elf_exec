@@ -12,7 +12,7 @@
 
 #include "http_download.h"
 
-int http_dl_log_level = 6;
+int http_dl_log_level = 7;
 
 static char *http_dl_agent_string = "Mozilla/5.0 (Windows NT 6.1; WOW64) " \
                                     "AppleWebKit/537.36 (KHTML, like Gecko) " \
@@ -1570,7 +1570,7 @@ static int http_dl_exec_core_proc()
         tv.tv_sec = HTTP_DL_SELECT_TIMEOUT;
         tv.tv_usec = 0;
 
-        http_dl_log_debug("Select: maxfd[%d].", maxfd);
+        //http_dl_log_debug("Select: maxfd[%d].", maxfd);
         result = select(maxfd + 1, &read_set, &write_set, NULL, &tv);
         if (result == 0) {
             /* 超时，处理各个链表其它事务 */
