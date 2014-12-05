@@ -1,4 +1,8 @@
-default: utils parser converter
+default: regen_symbol_table utils parser converter
+
+regen_symbol_table:
+	grep " [TBSADGR] " ../symbol_table.txt > ../symbol_table.txt.temp
+	mv ../symbol_table.txt.temp ../symbol_table.txt
 
 utils:
 	gcc -o utils.o -Wall -c utils.c
