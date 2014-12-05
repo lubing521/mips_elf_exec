@@ -16,10 +16,7 @@ static int is_neglected_stub_line(char *line)
         return 1;
     }
 
-    if (strncmp(line, "data_", 5) == 0) {
-        return 0;
-    }
-    if (strncmp(line, "func_", 5) == 0) {
+    if (strncmp(line, "void", 4) == 0) {
         return 0;
     }
 
@@ -40,18 +37,17 @@ static char *get_sym_from_stub_line(char *symbuf, char *line)
 {
     unsigned int len;
     char *cp, *cq;
+    char *token = "void *";
 
     if (symbuf == NULL || line == NULL) {
         return NULL;
     }
 
-    cp = strchr(line, ' ');
+    cp = strstr(line, token);
     if (cp == NULL) {
         return NULL;
     }
-    for (cp = cp + 1; *cp == ' '; cp++) {
-        (void)0;
-    }
+    cp = cp + strlen(token);
     cq = strchr(cp, ' ');
     if (cq == NULL) {
         return NULL;

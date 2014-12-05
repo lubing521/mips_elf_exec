@@ -1,0 +1,4 @@
+#!/bin/bash
+
+make probe 2>&1 | grep "undefined reference to" | awk '{print $5}' | sort -u | sed "s/'//g" | sed "s/\`//g" | awk '{print "void *"$1" = (void *)0x0;"}' > sym_stub.c
+rm *.o

@@ -2,7 +2,10 @@ cflags := -mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-
 
 cflags += -I ../../10_4_3b13_cache/include -I ../../10_4_3b13_cache/project/main/rsr1002e-rsr2004e/conf 
 
-default: parse compile convert link
+default: gen_sym_stub parse compile convert link
+
+gen_sym_stub:
+	../tools/gen_sym_stub
 
 parse:
 	../tools/parser ../symbol_table.txt
@@ -10,6 +13,7 @@ parse:
 compile:
 	mipsisa64-octeon-elf-gcc $(cflags) -c http_download.c -o http_download.o
 	mipsisa64-octeon-elf-gcc $(cflags) -c sym_stub.c -o sym_stub.o
+	mv sym_stub.c sym_stub.c.debug
 
 convert:
 	../tools/converter sym_stub.o
@@ -22,4 +26,4 @@ probe:
 	mipsisa64-octeon-elf-ld -T ../elf.ld http_download.o -o http_download
 
 clean:
-	rm -rf http_download.o http_download sym_stub.o
+	rm -rf http_download.o http_download sym_stub.o sym_stub.c*
