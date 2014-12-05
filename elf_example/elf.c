@@ -1,60 +1,66 @@
+#include <asm/string.h>
+#include <sys/print.h>
+#include <sys/socket.h>
+#include <sys/filio.h>
+#include <net/networklayer/in.h>
+#include <net/networklayer/inet_lib.h>
+
 #include "util.h"
 
-//typedef void (*func_type)();
-
-#if 0
-void dynload_elf()
-{
-    int a, b, max;
-    void *val;
-    func_type ptr;
-
-    a = 0x60;
-    b = 0x1;
-    max = dynload_max(a, b);
-    val = (void *)max;
-    ptr = (func_type)(0x001bd800 + val);
-
-    ptr("hehe%s<%d>\r\n", __func__, __LINE__);
-    ptr("xixi%s<%d>\r\n", __func__, __LINE__);
-
-    ptr("g_http_download_task <0x%8X>, value = 0x%8X\r\n", &g_http_download_task, g_http_download_task);
-    if (g_http_download_task != -1) {
-        ptr("Task already running\r\n");
-    } else {
-        ptr("Task generated...\r\n");
-    }
-
-    return;
-}
-#endif
-
-char global_var[1<<20];
+char *host = "115.239.211.110";
+int sockfd = -1;
 
 void dynload_entry()
 {
-//    func_type ptr;
-    int a, b, max;
+    int ret;
+    int nb;
+    struct sockaddr_in sa;
 
-    a = 0x60;
-    b = 0x1;
-    max = dlmax(a, b);
+    memset(&sa, 0, sizeof(sa));
+    ret = inet_pton(AF_INET, host, &sa.sin_addr);
+    if (ret != 1) {
+        printk("inet_pton() failed.\r\n");
+        return;
+    }
 
-//    ptr = (func_type)(0x001bd860);
-//    ptr("max = %d\r\n", max);
-    printk("max = %d\r\n", max);
+    sa.sin_family = AF_INET;
+    sa.sin_port = htons(80);
+
+    ret = socket(AF_INET, SOCK_STREAM, 0);
+    if (ret == -1) {
+        printk("Create socket failed.\r\n");
+        return;
+    }
+
+    nb = 1;
+    if (ioctl(ret, FIONBIO, &nb) != 0) {
+        close(ret);
+        printk("Ioctl set non-blocking fd failed.\r\n");
+        return;
+    }
+
+    if (connect(ret, (struct sockaddr *)&sa, sizeof(sa)) != 0) {
+        close(ret);
+        printk("Connect failed.\r\n");
+        return;
+    }
+
+    sockfd = ret;
+    printk("Connect to %s success: %d.\r\n", host, sockfd);
 
     return;
 }
 
 void dynload_exit()
 {
-//    func_type ptr;
-
-//    ptr = (func_type)(0x001bd860);
-
-//    ptr("Exit...\r\n");
-    printk("Exit...\r\n");
+    if (sockfd == -1) {
+        printk("Invalid sockfd.\r\n");
+    } else {
+        printk("Closing sockfd %d.\r\n", sockfd);
+        close(sockfd);
+        printk("Closed.\r\n");
+    }
 
     return;
 }
+
