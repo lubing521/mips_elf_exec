@@ -19,11 +19,11 @@ convert:
 	../tools/converter sym_stub.o
 
 link:
-	mipsisa64-octeon-elf-ld -T ../elf.ld http_download.o sym_stub.o -o http_download
+	mipsisa64-octeon-elf-ld --gc-sections -T ../elf.ld http_download.o sym_stub.o -o http_download
 
 probe:
 	mipsisa64-octeon-elf-gcc $(cflags) -c http_download.c -o http_download.o
-	mipsisa64-octeon-elf-ld -T ../elf.ld http_download.o -o http_download
+	mipsisa64-octeon-elf-ld --gc-sections -T ../elf.ld http_download.o -o http_download
 
 clean:
 	rm -rf http_download.o http_download sym_stub.o sym_stub.c*

@@ -510,7 +510,7 @@ static int ranom8T(char *output_str, int seed)
     _loc5_ = 0;
     _loc7_ = 0;
     while((_loc5_ < _loc4_) && (_loc5_ < (YK_FILEID_LEN + 2))) {
-        _loc7_ = (int)(zf(&seed) * strlen(_loc2_));	
+        _loc7_ = (int)(zf(&seed) * strlen(_loc2_));
         if (_loc7_ >= (YK_FILEID_LEN + 4)) {
             return -1;
         }

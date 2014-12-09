@@ -364,9 +364,12 @@ ngx_main(ulong argc, void *argv)
         return 0;
     }
 */
+    /* ZHAOYAO XXX: signal is not support */
+#if 0
     if (ngx_signal) {
         return ngx_signal_process(cycle, ngx_signal);
     }
+#endif
 
     ngx_os_status(cycle->log);
 
@@ -427,7 +430,7 @@ ngx_main(ulong argc, void *argv)
     return 0;
 }
 
-void ngx_init(void)
+void dynload_entry()
 {
     task_t ngx_task;
     ngx_task = create_task("nginx-httpd", ngx_main, 0, NULL,
@@ -436,6 +439,11 @@ void ngx_init(void)
         printk_err("NGINX", "SUB_SYS", "%s", "create nginx task failed\n");
     }
     return ;
+}
+
+void dynload_exit()
+{
+    return;
 }
 
 static char *getenv(const char *envvar)
@@ -1404,5 +1412,5 @@ ngx_set_worker_processes(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 }
 
 
-SUBSYS_DEFINE_00(NGINX, SUBSYS_CLASS_APPLICATION, 1, ngx_init, NULL, "r_tcp");
+//SUBSYS_DEFINE_00(NGINX, SUBSYS_CLASS_APPLICATION, 1, ngx_init, NULL, "r_tcp");
 
