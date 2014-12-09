@@ -207,17 +207,20 @@ ngx_main(ulong argc, void *argv)
     ngx_cycle_t      *cycle, init_cycle;
     ngx_core_conf_t  *ccf;
 
-    ngx_debug_init();
+//    ngx_debug_init();
 
     if (ngx_strerror_init() != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
         return 1;
     }
 
-    /*if (ngx_get_options(argc, argv) != NGX_OK) {
+#if 0
+    if (ngx_get_options(argc, argv) != NGX_OK) {
         return 1;
-    }*/
+    }
+#endif
 
+#if 0
     if (ngx_show_version) {
         ngx_write_stderr("nginx version: " NGINX_VER NGX_LINEFEED);
 
@@ -271,6 +274,7 @@ ngx_main(ulong argc, void *argv)
         }
 */
     }
+#endif
 
     /* TODO */ ngx_max_sockets = -1;
 
@@ -422,6 +426,7 @@ ngx_main(ulong argc, void *argv)
     ngx_use_stderr = 0;
     ngx_process = NGX_PROCESS_SINGLE; //tangyoucan
     if (ngx_process == NGX_PROCESS_SINGLE) {
+        printk("%s-%d: everything is fine.\r\n", __FILE__, __LINE__);
         ngx_single_process_cycle(cycle);
     } else {
         ngx_master_process_cycle(cycle);
@@ -443,6 +448,7 @@ void dynload_entry()
 
 void dynload_exit()
 {
+    printk("not support exiting now.\r\n");
     return;
 }
 
