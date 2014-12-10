@@ -3,7 +3,7 @@ CFLAGS := -mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-
 CFLAGS += -I ../../10_4_3b13_cache/include -I ../../10_4_3b13_cache/project/main/rsr1002e-rsr2004e/conf
 
 CC = mipsisa64-octeon-elf-gcc
-LINK = mipsisa64-octeon-elf-ld --gc-sections
+LINK = mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections
 
 default: gen_sym_stub parse compile convert link
 

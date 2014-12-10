@@ -20,12 +20,12 @@ convert:
 	../tools/converter sym_stub.o
 
 link:
-	mipsisa64-octeon-elf-ld --gc-sections -T ../elf.ld elf.o sym_stub.o util.o -o elf
+	mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections -T ../elf.ld elf.o sym_stub.o util.o -o elf
 
 probe:
 	mipsisa64-octeon-elf-gcc $(cflags) -c elf.c -o elf.o
 	mipsisa64-octeon-elf-gcc $(cflags) -c util.c -o util.o
-	mipsisa64-octeon-elf-ld --gc-sections -T ../elf.ld elf.o util.o -o elf
+	mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections -T ../elf.ld elf.o util.o -o elf
 	
 
 clean:
