@@ -54,6 +54,11 @@ wan_ta_app_t ngx_http_snooping_app =
     ngx_http_snooping_shut
 };
 
+static task_t g_ngx_sp_write_task = NULL;
+static volatile int g_ngx_sp_write_task_exiting = 0;
+static task_t g_ngx_sp_rxtx_task = NULL;
+static volatile int g_ngx_sp_rxtx_task_exiting = 0;
+
 ngx_str_t http_end = ngx_string("\r\n\r\n");
 ngx_str_t http_host = ngx_string("Host: ");
 ngx_str_t http_method_get = ngx_string("GET ");
@@ -3152,6 +3157,10 @@ void ngx_http_snooping_write_task(ulong argc, void *argv)
     sleep(HZ * 60);
     ngx_http_snooping_load_url();
     while (1) {
+        if (g_ngx_sp_write_task_exiting) {
+            printk("%s<%d>: g_ngx_sp_write_task exiting...\r\n", __func__, __LINE__);
+            break;
+        }
         sleep(HZ * 2);
         ngx_http_snooping_write_process();
     }
@@ -3166,6 +3175,8 @@ void ngx_http_sp2c_rec_process(void)
     struct sockaddr_in sc_ad;
     ngx_int_t rc, err_step = 0;
     unsigned int peerlen = sizeof(sc_ad);
+
+    /* ZHAOYAO XXX TODO: 资源释放 */
 
     rc = recvfrom(ngx_sp2c_socket, (void *)&sp2c_req, sizeof(http_sp2c_res_pkt_t), 0, (struct sockaddr *)&sc_ad, &peerlen);
     if (rc != sizeof(http_sp2c_res_pkt_t)) {
@@ -3204,6 +3215,8 @@ void ngx_http_c2sp_rec_process(void)
     struct sockaddr_in sc_ad;
     ngx_int_t rc, err_step = 0;
     unsigned int peerlen = sizeof(sc_ad);
+
+    /* ZHAOYAO XXX TODO: 资源释放 */
 
     rc = recvfrom(ngx_c2sp_socket, (void *)&c2sp_req, sizeof(http_c2sp_req_pkt_t), 0, (struct sockaddr *)&sc_ad, &peerlen);
     if (rc != sizeof(http_c2sp_req_pkt_t)) {
@@ -3245,8 +3258,8 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
     sc_ad.sin_family = AF_INET;
     ngx_c2sp_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (ngx_c2sp_socket == -1) {
-        err_step = 1;
-        goto exit_label;
+        printk("ERROR: %s<%d>: create ngx_c2sp_socket failed.\r\n", __func__, __LINE__);
+        goto err_out0;
     }
 
     i = 1;
@@ -3255,14 +3268,14 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
     setsockopt(ngx_c2sp_socket, SOL_SOCKET, SO_RCVBUF,(char *)&i,sizeof(i));*/
     sc_ad.sin_port = htons(HTTP_C2SP_PORT);
     if (bind(ngx_c2sp_socket, (struct sockaddr *)&sc_ad, sizeof(struct sockaddr)) == -1) {
-        err_step = 2;
-        goto exit_label;
+        printk("ERROR: %s<%d>: bind ngx_c2sp_socket failed.\r\n", __func__, __LINE__);
+        goto err_out1;
     }
 
     ngx_sp2c_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (ngx_sp2c_socket == -1) {
-        err_step = 3;
-        goto exit_label;
+        printk("ERROR: %s<%d>: create ngx_sp2c_socket failed.\r\n", __func__, __LINE__);
+        goto err_out1;
     }
 
     i = 1;
@@ -3271,13 +3284,17 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
     setsockopt(ngx_sp2c_socket, SOL_SOCKET, SO_RCVBUF,(char *)&i, sizeof(i));*/
     sc_ad.sin_port = htons(HTTP_SP2C_PORT);
     if (bind(ngx_sp2c_socket, (struct sockaddr *)&sc_ad, sizeof(struct sockaddr)) == -1) {
-        err_step = 4;
-        goto exit_label;
+        printk("ERROR: %s<%d>: bind ngx_sp2c_socket failed.\r\n", __func__, __LINE__);
+        goto err_out2;
     }
 
     fd = MAX(ngx_sp2c_socket, ngx_c2sp_socket);
     while (1) {
-        time_out.tv_sec = 10;
+        if (g_ngx_sp_rxtx_task_exiting) {
+            printk("%s<%d>: exiting...\r\n", __func__, __LINE__);
+            break;
+        }
+        time_out.tv_sec = 1;    /* ZHAOYAO XXX: 为了监听exit，降低timeout时间，从10s变为1s */
         time_out.tv_usec = 0;
         FD_ZERO(&read_fset);
         FD_SET(ngx_sp2c_socket, &read_fset);
@@ -3298,8 +3315,16 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
             break;
         }
     }
-exit_label:
-    printk("%s-%d err_step = %d\r\n", __FILE__, __LINE__, err_step);
+
+err_out2:
+    printk("%s<%d>: close ngx_sp2c_socket ...\r\n", __func__, __LINE__);
+    close(ngx_sp2c_socket);
+
+err_out1:
+    printk("%s<%d>: close ngx_c2sp_socket ...\r\n", __func__, __LINE__);
+    close(ngx_c2sp_socket);
+
+err_out0:
     return;
 }
 
@@ -3315,7 +3340,6 @@ void ngx_http_snooping_init(ngx_log_t *log)
     http_snooping_url_t *url_node;
     http_sp_connection_t *con_node;
     http_snooping_buf_t *buf_node;
-    task_t ngx_sp_write_task, ngx_sp_rxtx_task;
     http_mime_type_t *pmime;
     http_cache_host_url_t *phost_url;
     //http_cache_file_avlnode_t *pcache_file_node;
@@ -3344,7 +3368,6 @@ void ngx_http_snooping_init(ngx_log_t *log)
     }
     memset(g_http_snooping_ctx.url_base, 0, g_http_snooping_ctx.url_max * sizeof(http_snooping_url_t));
     INIT_LIST_HEAD(&g_http_snooping_ctx.url_free_list);
-    INIT_LIST_HEAD(&g_http_snooping_ctx.url_use_list);
     INIT_LIST_HEAD(&g_http_snooping_ctx.url_use_list);
     for (i = 0; i < g_http_snooping_ctx.url_max; i++) {
         url_node = &g_http_snooping_ctx.url_base[i];
@@ -3421,28 +3444,78 @@ void ngx_http_snooping_init(ngx_log_t *log)
         avlInsert(&http_cache_host_tree, phost_url, node_key, http_host_cmp);
     }
 
-    ngx_sp_write_task = create_task("nginx-http-write", ngx_http_snooping_write_task, 0, NULL,
+    g_ngx_sp_write_task = create_task("nginx-http-write", ngx_http_snooping_write_task, 0, NULL,
         (128 * 1024), APP_TASK);
-    if (ngx_sp_write_task == NULL) {
+    if (g_ngx_sp_write_task == NULL) {
         err_step = 8;
         printk_err("NGINX", "SUB_SYS", "%s", "Create Http Snooping Write Task Failed\n");
     }
 
-    ngx_sp_rxtx_task = create_task("nginx-httpsp-rxtx", ngx_http_snooping_rxtx_task, 0, NULL,
+    g_ngx_sp_rxtx_task = create_task("nginx-httpsp-rxtx", ngx_http_snooping_rxtx_task, 0, NULL,
         (64 * 1024), APP_TASK);
-    if (ngx_sp_rxtx_task == NULL) {
+    if (g_ngx_sp_rxtx_task == NULL) {
         err_step = 9;
         printk_err("NGINX", "SUB_SYS", "%s", "Create Http Snooping RXTX Task Failed\n");
     }
 
     wan_ta_app_reg(&ngx_http_snooping_app, WAN_TA_APP_HTTP_SNOOPING);
-    cli_add_command(PARSE_ADD_SHOW_CMD, &TNAME(exec_show_http_app), "Show http url cache Command");
-    cli_add_command(PARSE_ADD_CFG_TOP_CMD, &TNAME(cfg_httpsp_app), "http snooping");
-    cli_add_command(PARSE_ADD_CFG_TOP_CMD, &TNAME(cfg_snoop_client_append_point),
-                        "http snooping client");
+    //cli_add_command(PARSE_ADD_SHOW_CMD, &TNAME(exec_show_http_app), "Show http url cache Command");
+    //cli_add_command(PARSE_ADD_CFG_TOP_CMD, &TNAME(cfg_httpsp_app), "http snooping");
+    //cli_add_command(PARSE_ADD_CFG_TOP_CMD, &TNAME(cfg_snoop_client_append_point),
+    //                    "http snooping client");
 end_label:
     printk("%s-%d err_step = %d\r\n", __FILE__, __LINE__, err_step);
     return;
+}
+
+void ngx_http_snooping_uninit()
+{
+    /* ZHAOYAO TODO: 卸载CLI，调试中并不添加CLI */
+    
+
+    /* ZHAOYAO XXX: 卸载传输优化注册 */
+    wan_ta_app_dreg(WAN_TA_APP_HTTP_SNOOPING);
+
+    /* ZHAOYAO XXX: 关闭g_ngx_sp_rxtx_task任务 */
+    if (g_ngx_sp_rxtx_task != NULL) {
+        g_ngx_sp_rxtx_task_exiting = 1;
+        sleep(2 * HZ);
+        printk_rt("%s<%d>: deleting g_ngx_sp_rxtx_task.\r\n", __func__, __LINE__);
+        delete_task(g_ngx_sp_rxtx_task);
+        g_ngx_sp_rxtx_task = NULL;
+        g_ngx_sp_rxtx_task_exiting = 0;
+    }
+
+    /* ZHAOYAO XXX: 关闭g_ngx_sp_write_task任务 */
+    if (g_ngx_sp_write_task != NULL) {
+        g_ngx_sp_write_task_exiting = 1;
+        sleep(3 * HZ);
+        printk_rt("%s<%d>: deleting g_ngx_sp_write_task.\r\n", __func__, __LINE__);
+        delete_task(g_ngx_sp_write_task);
+        g_ngx_sp_write_task = NULL;
+        g_ngx_sp_write_task_exiting = 0;
+    }
+
+    /* ZHAOYAO XXX: 销毁AVL树http_cache_host_tree和http_mime_tree，AVL的节点都是静态分配，所以不需要free */
+    http_cache_host_tree = NULL;
+    http_mime_tree = NULL;
+
+    /* ZHAOYAO TODO: 释放g_http_snooping_ctx.data_buf_base[0]空间, 注意数据面与控制面的锁 */
+    list_del_init(&g_http_snooping_ctx.data_buf_free_list);
+    kfree(g_http_snooping_ctx.data_buf_base[0]);
+
+    /* ZHAOYAO TODO: 释放g_http_snooping_ctx.con_base空间, 注意数据面与控制面的锁 */
+    list_del_init(&g_http_snooping_ctx.con_free_list);
+    list_del_init(&g_http_snooping_ctx.con_use_list);
+    kfree(g_http_snooping_ctx.con_base);
+
+    /* ZHAOYAO TODO: 释放g_http_snooping_ctx.url_base空间, 注意数据面与控制面的锁 */
+    list_del_init(&g_http_snooping_ctx.url_free_list);
+    list_del_init(&g_http_snooping_ctx.url_use_list);
+    kfree(g_http_snooping_ctx.url_base);
+
+    /* ZHAOYAO TODO: 释放g_http_snooping_ctx.http_sp_url_pool池 */
+    ngx_destroy_pool(g_http_snooping_ctx.http_sp_url_pool);
 }
 
 ngx_int_t ngx_http_snooping_create(tcp_proxy_cb_t *tp_entry)

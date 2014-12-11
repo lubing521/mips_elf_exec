@@ -38,6 +38,10 @@ ngx_init_setproctitle(ngx_log_t *log)
     size_t       size;
     ngx_uint_t   i;
 
+    /* ZHAOYAO FIXME: return directly */
+    printk("%s<%d>: return directly.\r\n", __func__, __LINE__);
+    return NGX_OK;
+
     size = 0;
 
     for (i = 0; environ[i]; i++) {

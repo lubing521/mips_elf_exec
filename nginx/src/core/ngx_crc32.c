@@ -100,6 +100,7 @@ uint32_t  ngx_crc32_table256[] = {
 
 
 uint32_t *ngx_crc32_table_short = ngx_crc32_table16;
+uint32_t *ngx_crc32_table_short_alloc = NULL;
 
 
 ngx_int_t
@@ -118,6 +119,7 @@ ngx_crc32_table_init(void)
     if (p == NULL) {
         return NGX_ERROR;
     }
+    ngx_crc32_table_short_alloc = p; /* ZHAOYAO XXX: 由于后面做了cacheline对齐，需在这里记录原有分配的mem */
 
     p = ngx_align_ptr(p, ngx_cacheline_size);
 
@@ -126,4 +128,12 @@ ngx_crc32_table_init(void)
     ngx_crc32_table_short = p;
 
     return NGX_OK;
+}
+
+void ngx_crc32_table_uninit(void)
+{
+    if (ngx_crc32_table_short_alloc != NULL) {
+        ngx_free(ngx_crc32_table_short_alloc);
+        ngx_crc32_table_short_alloc = NULL;
+    }
 }

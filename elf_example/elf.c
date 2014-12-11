@@ -10,11 +10,17 @@
 char *host = "115.239.211.110";
 int sockfd = -1;
 
+typedef struct hehe_s {
+    int count;
+    char mem[];
+} hehe_t;
+
 void dynload_entry()
 {
     int ret;
     int nb;
     struct sockaddr_in sa;
+    void *ptr;
 
     memset(&sa, 0, sizeof(sa));
     ret = inet_pton(AF_INET, host, &sa.sin_addr);
@@ -47,6 +53,13 @@ void dynload_entry()
 
     sockfd = ret;
     printk("Connect to %s success: %d.\r\n", host, sockfd);
+    printk("sizeof hehe_t: %d\r\n", sizeof(hehe_t));
+    ptr = kmalloc(sizeof(hehe_t) + 128, 0);
+    if (ptr != NULL) {
+        printk("allocate success.\r\n");
+        kfree(ptr);
+        printk("free success.\r\n");
+    }
 
     return;
 }

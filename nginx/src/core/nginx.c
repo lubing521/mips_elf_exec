@@ -8,8 +8,6 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <nginx.h>
-#include <sys/subsystem.h>
-#include <sys/support.h>
 
 
 static ngx_int_t ngx_add_inherited_sockets(ngx_cycle_t *cycle);
@@ -26,6 +24,8 @@ static char *ngx_set_cpu_affinity(ngx_conf_t *cf, ngx_command_t *cmd,
 static char *ngx_set_worker_processes(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
 
+static task_t g_hot_cache_task = NULL;
+volatile int g_hot_cache_exiting = 0;
 
 static ngx_conf_enum_t  ngx_debug_points[] = {
     { ngx_string("stop"), NGX_DEBUG_POINTS_STOP },
@@ -202,6 +202,7 @@ static char **ngx_os_environ = NULL;
 int ngx_cdecl
 ngx_main(ulong argc, void *argv)
 {
+    int               ret = 0;
     ngx_int_t         i;
     ngx_log_t        *log;
     ngx_cycle_t      *cycle, init_cycle;
@@ -211,7 +212,8 @@ ngx_main(ulong argc, void *argv)
 
     if (ngx_strerror_init() != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out0;
     }
 
 #if 0
@@ -289,14 +291,15 @@ ngx_main(ulong argc, void *argv)
     log = ngx_log_init(ngx_prefix);
     if (log == NULL) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out3;
     }
 
     ngx_http_snooping_init(log);
-    sleep(45*HZ);
+    sleep(45 * HZ);
 
     /* STUB */
-#if (NGX_OPENSSL)
+#if 0 // (NGX_OPENSSL)
     ngx_ssl_init(log);
 #endif
 
@@ -312,7 +315,8 @@ ngx_main(ulong argc, void *argv)
     init_cycle.pool = ngx_create_pool(1024, log);
     if (init_cycle.pool == NULL) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out5;
     }
 
     /*if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
@@ -321,27 +325,31 @@ ngx_main(ulong argc, void *argv)
 
     if (ngx_process_options(&init_cycle) != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out6;
     }
 
     if (ngx_os_init(log) != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out6;
     }
 
     /*
      * ngx_crc32_table_init() requires ngx_cacheline_size set in ngx_os_init()
      */
-
     if (ngx_crc32_table_init() != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out7;
     }
 
+#if 0
     if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
         return 1;
     }
+#endif
 
     ngx_max_module = 0;
     for (i = 0; ngx_modules[i]; i++) {
@@ -355,7 +363,8 @@ ngx_main(ulong argc, void *argv)
                            init_cycle.conf_file.data);
         }
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out8;
     }
 
 /*
@@ -408,12 +417,14 @@ ngx_main(ulong argc, void *argv)
 */
     if (ngx_create_pidfile(&ccf->pid, cycle->log) != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out9;
     }
 
     if (ngx_log_redirect_stderr(cycle) != NGX_OK) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
-        return 1;
+        ret = 1;
+        goto err_out9;
     }
 
     if (log->file->fd != ngx_stderr) {
@@ -432,24 +443,90 @@ ngx_main(ulong argc, void *argv)
         ngx_master_process_cycle(cycle);
     }
 
-    return 0;
+err_out9:
+    ngx_uninit_cycle(&cycle);
+
+err_out8:
+    ngx_crc32_table_uninit();
+
+err_out7:
+    ngx_os_uninit();
+
+err_out6:
+    /* ZHAOYAO XXX: 在ngx_init_cycle()后，init_cycle的pool已经被销毁，因此需要在ngx_destroy_pool增加检查 */
+    ngx_destroy_pool(init_cycle.pool);
+
+err_out5:
+    ngx_http_snooping_uninit();
+
+err_out4:
+    ngx_log_uninit(log);
+
+err_out3:
+#if (NGX_PCRE)
+    ngx_regex_uninit();
+#endif
+
+err_out2:
+    ngx_time_uninit();
+
+err_out1:
+    ngx_strerror_uninit();
+
+err_out0:
+    return ret;
+}
+
+static void hot_cache()
+{
+    if (g_hot_cache_task != NULL) {
+        printk("Hot Cache task entity is already running...\r\n");
+        return;
+    }
+
+    g_hot_cache_task = create_task("nginx-httpd",
+                                    ngx_main,
+                                    0,
+                                    NULL,
+                                    (128 * 1024),
+                                    APP_TASK);
+    if (g_hot_cache_task == NULL){
+        printk("Create Hot Cache task failed.\r\n");
+    }
+
+    return ;
+}
+
+static void hot_cache_destroy()
+{
+    if (g_hot_cache_task == NULL) {
+        return;
+    }
+
+    g_hot_cache_exiting = 1;
+
+    sleep(20 * HZ);
+
+    printk_rt("%s<%d>: deleting g_hot_cache_task.\r\n", __func__, __LINE__);
+    delete_task(g_hot_cache_task);
+    g_hot_cache_task = NULL;
+
+    g_hot_cache_exiting = 0;
+
+    return;
 }
 
 void dynload_entry()
 {
-    task_t ngx_task;
-    ngx_task = create_task("nginx-httpd", ngx_main, 0, NULL,
-        (128 * 1024), APP_TASK);
-    if (ngx_task == NULL){
-        printk_err("NGINX", "SUB_SYS", "%s", "create nginx task failed\n");
-    }
-    return ;
+    hot_cache();
 }
 
 void dynload_exit()
 {
-    printk("not support exiting now.\r\n");
-    return;
+    printk("Exiting now.\r\n");
+//    return;
+
+    hot_cache_destroy();
 }
 
 static char *getenv(const char *envvar)
@@ -904,7 +981,9 @@ ngx_process_options(ngx_cycle_t *cycle)
         cycle->prefix.data = p;
 
     } else {
-
+        printk("ERROR: %s<%d>: must set ngx_prefix.\r\n", __func__, __LINE__);
+        return NGX_ERROR;
+#if 0
 #ifndef NGX_PREFIX
 
         p = ngx_pnalloc(cycle->pool, NGX_MAX_PATH);
@@ -935,6 +1014,7 @@ ngx_process_options(ngx_cycle_t *cycle)
 #endif
         ngx_str_set(&cycle->prefix, NGX_PREFIX);
 
+#endif
 #endif
     }
 

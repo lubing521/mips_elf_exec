@@ -311,25 +311,19 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 #endif
 }
 
+extern volatile int g_hot_cache_exiting;
 
 void
 ngx_single_process_cycle(ngx_cycle_t *cycle)
 {
     ngx_uint_t  i;
 
-#if 0
-    if (ngx_set_environment(cycle, NULL) == NULL) {
-        /* fatal */
-        printf("%s-%d\r\n", __FILE__, __LINE__);
-        return 2;
-    }
-#endif
-
     for (i = 0; ngx_modules[i]; i++) {
         if (ngx_modules[i]->init_process) {
             if (ngx_modules[i]->init_process(cycle) == NGX_ERROR) {
                 /* fatal */
-                printf("%s-%d module %d\r\n", __FILE__, __LINE__, i);
+                /* ZHAOYAO FIXME TODO XXX: 之前成功init_process的module，申请的资源如何释放??? */
+                printk("%s-%d module %d\r\n", __FILE__, __LINE__, i);
                 return ;
             }
         }
@@ -340,7 +334,7 @@ ngx_single_process_cycle(ngx_cycle_t *cycle)
 
         ngx_process_events_and_timers(cycle);
 
-        if (ngx_terminate || ngx_quit) {
+        if (g_hot_cache_exiting || ngx_terminate || ngx_quit) {
 
             for (i = 0; ngx_modules[i]; i++) {
                 if (ngx_modules[i]->exit_process) {
@@ -349,30 +343,9 @@ ngx_single_process_cycle(ngx_cycle_t *cycle)
             }
 
             ngx_master_process_exit(cycle);
-            printf("%s-%d\r\n", __FILE__, __LINE__);
+            printk("%s-%d: exiting...\r\n", __FILE__, __LINE__);
             break;
         }
-
-/*
-        if (ngx_reconfigure) {
-            ngx_reconfigure = 0;
-            ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "reconfiguring");
-
-            cycle = ngx_init_cycle(cycle);
-            if (cycle == NULL) {
-                cycle = (ngx_cycle_t *) ngx_cycle;
-                continue;
-            }
-
-            ngx_cycle = cycle;
-        }
-
-        if (ngx_reopen) {
-            ngx_reopen = 0;
-            ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "reopening logs");
-            ngx_reopen_files(cycle, (ngx_uid_t) -1);
-        }
-*/
     }
 }
 
@@ -745,6 +718,7 @@ ngx_master_process_exit(ngx_cycle_t *cycle)
 
     ngx_exit_log_file.fd = ngx_cycle->log->file->fd;
 
+    /* ZHAOYAO XXX FIXME: ngx_exit_log中fd是啥子? 需要close不? */
     ngx_exit_log = *ngx_cycle->log;
     ngx_exit_log.file = &ngx_exit_log_file;
     ngx_exit_log.next = NULL;
@@ -754,7 +728,8 @@ ngx_master_process_exit(ngx_cycle_t *cycle)
     ngx_exit_cycle.files_n = ngx_cycle->files_n;
     ngx_cycle = &ngx_exit_cycle;
 
-    ngx_destroy_pool(cycle->pool);
+    /* ZHAOYAO XXX: 留到ngx_uninit_cycle()中再销毁pool */
+//    ngx_destroy_pool(cycle->pool);
 
     return 0;
 }

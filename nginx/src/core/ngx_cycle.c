@@ -376,6 +376,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             continue;
         }
 
+        /* ZHAOYAO FIXME XXX: 跟踪打开的文件资源 */
         file[i].fd = ngx_open_file(file[i].name.data,
                                    NGX_FILE_APPEND,
                                    NGX_FILE_CREATE_OR_OPEN,
@@ -403,6 +404,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 #endif
     }
 
+    /* ZHAOYAO FIXME XXX: 跟踪新打开的new_log */
     cycle->log = &cycle->new_log;
     pool->log = &cycle->new_log;
 
@@ -623,8 +625,9 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             if (ngx_modules[i]->init_module(cycle) != NGX_OK) {
                 /* fatal */
                 //exit(1);
-                printk("%s-%d i = %d\r\n", __FILE__, __LINE__, i);
-                return 1;
+                /* ZHAOYAO FIXME XXX TODO: 如何处理接下来的困局??? */
+                printk("FATAL error: %s<%d>: init_module %u failed.\r\n", __func__, __LINE__, i);
+                goto failed;
             }
         }
     }
@@ -747,7 +750,7 @@ old_shm_zone_done:
     ngx_destroy_pool(conf.temp_pool);
 
     if (ngx_process == NGX_PROCESS_MASTER || ngx_is_init_cycle(old_cycle)) {
-
+        /* ZHAOYAO XXX: 我们其实在这里就返回了。 */
         /*
          * perl_destruct() frees environ, if it is not the same as it was at
          * perl_construct() time, therefore we save the previous cycle
@@ -758,6 +761,7 @@ old_shm_zone_done:
         environ = senv;
 
         ngx_destroy_pool(old_cycle->pool);
+        old_cycle->pool = NULL;
         cycle->old_cycle = NULL;
 
         environ = env;
@@ -772,8 +776,10 @@ old_shm_zone_done:
             ngx_log_error(NGX_LOG_EMERG, cycle->log, 0,
                           "could not create ngx_temp_pool");
             //exit(1);
- printk("%s-%d \r\n", __FILE__, __LINE__);
-            return 1;
+            /* ZHAOYAO FIXME XXX TODO: 如何解决困局??? */
+            printk("FATAL error: %s<%d>: create ngx_temp_pool failed.\r\n", __func__, __LINE__);
+            ngx_uninit_cycle(&cycle);
+            return NULL;
         }
 
         n = 10;
@@ -781,8 +787,10 @@ old_shm_zone_done:
                                           n * sizeof(ngx_cycle_t *));
         if (ngx_old_cycles.elts == NULL) {
             //exit(1);
- printk("%s-%d \r\n", __FILE__, __LINE__);
-            return 1;
+            /* ZHAOYAO FIXME XXX TODO: 如何解决困局??? */
+            printk("FATAL error: %s<%d>: create ngx_old_cycles.elts failed.\r\n", __func__, __LINE__);
+            ngx_uninit_cycle(&cycle);
+            return NULL;
         }
         ngx_old_cycles.nelts = 0;
         ngx_old_cycles.size = sizeof(ngx_cycle_t *);
@@ -800,8 +808,10 @@ old_shm_zone_done:
     old = ngx_array_push(&ngx_old_cycles);
     if (old == NULL) {
         //exit(1);
- printk("%s-%d \r\n", __FILE__, __LINE__);
-        return 0;
+        /* ZHAOYAO FIXME XXX TODO: 如何解决困局??? */
+        printk("FATAL error: %s<%d>: ngx_array_push ngx_old_cycles failed.\r\n", __func__, __LINE__);
+        ngx_uninit_cycle(&cycle);
+        return NULL;
     }
     *old = old_cycle;
 
@@ -872,6 +882,78 @@ failed:
     ngx_destroy_cycle_pools(&conf);
 
     return NULL;
+}
+
+void ngx_uninit_cycle(ngx_cycle_t *cycle)
+{
+    ngx_uint_t           i;
+    ngx_shm_zone_t      *shm_zone;
+    ngx_list_part_t     *part;
+    ngx_open_file_t     *file;
+    u_char               uc;
+    ngx_listening_t     *ls;
+
+    if (cycle == NULL) {
+        return;
+    }
+
+    /* ZHAOYAO FIXME XXX: 这样清理shm正确么? */
+    part = &cycle->shared_memory.part;
+    shm_zone = part->elts;
+    for (i = 0; /* void */ ; i++) {
+        if (i >= part->nelts) {
+            if (part->next == NULL) {
+                break;
+            }
+            part = part->next;
+            shm_zone = part->elts;
+            i = 0;
+        }
+
+        ngx_shm_free(&shm_zone[i].shm);
+    }
+
+    part = &cycle->open_files.part;
+    file = part->elts;
+    for (i = 0; /* void */ ; i++) {
+        if (i >= part->nelts) {
+            if (part->next == NULL) {
+                break;
+            }
+            part = part->next;
+            file = part->elts;
+            i = 0;
+        }
+
+        if (file[i].fd == NGX_INVALID_FILE || file[i].fd == ngx_stderr) {
+            continue;
+        }
+
+        if (ngx_close_file(file[i].fd) == NGX_FILE_ERROR) {
+            uc = file->name.data[file->name.len];
+            file->name.data[file->name.len] = '\0';
+            printk("%s<%d>: close file %s failed.\r\n", __func__, __LINE__, file->name.data);
+            file->name.data[file->name.len] = uc;
+        }
+    }
+
+    ls = cycle->listening.elts;
+    for (i = 0; i < cycle->listening.nelts; i++) {
+        if (ls[i].fd == (ngx_socket_t) -1 || !ls[i].open) {
+            continue;
+        }
+
+        if (ngx_close_socket(ls[i].fd) == -1) {
+            uc = ls[i].addr_text.data[ls[i].addr_text.len];
+            ls[i].addr_text.data[ls[i].addr_text.len] = '\0';
+            printk("%s<%d>: close listening address %s failed.\r\n", __func__, __LINE__, ls[i].addr_text.data);
+            ls[i].addr_text.data[ls[i].addr_text.len] = uc;
+        }
+    }
+
+    ngx_destroy_pool(cycle->pool);
+
+    return;
 }
 
 

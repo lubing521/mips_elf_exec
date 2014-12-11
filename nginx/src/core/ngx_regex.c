@@ -76,6 +76,11 @@ ngx_regex_init(void)
     pcre_free = ngx_regex_free;
 }
 
+void ngx_regex_uninit(void)
+{
+    return;
+}
+
 
 static ngx_inline void
 ngx_regex_malloc_init(ngx_pool_t *pool)

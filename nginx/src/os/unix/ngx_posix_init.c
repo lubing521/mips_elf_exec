@@ -34,7 +34,7 @@ ngx_os_init(ngx_log_t *log)
 {
     ngx_uint_t  n;
 
-#if (NGX_HAVE_OS_SPECIFIC_INIT)
+#if 0 // (NGX_HAVE_OS_SPECIFIC_INIT)
     printf("%s-%d\r\n", __FILE__, __LINE__);
     if (ngx_os_specific_init(log) != NGX_OK) {
         return NGX_ERROR;
@@ -57,7 +57,7 @@ ngx_os_init(ngx_log_t *log)
         ngx_ncpu = sysconf(_SC_NPROCESSORS_ONLN);
     }
 #endif
-    printf("%s-%d ngx_ncpu = %d\r\n", __FILE__, __LINE__, ngx_ncpu);
+    printk("%s-%d ngx_ncpu = %d\r\n", __FILE__, __LINE__, ngx_ncpu);
     if (ngx_ncpu < 1) {
         ngx_ncpu = 1;
     }
@@ -86,6 +86,10 @@ ngx_os_init(ngx_log_t *log)
     return NGX_OK;
 }
 
+void ngx_os_uninit(void)
+{
+    return;
+}
 
 void
 ngx_os_status(ngx_log_t *log)

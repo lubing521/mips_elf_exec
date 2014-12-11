@@ -85,3 +85,25 @@ failed:
 
     return NGX_ERROR;
 }
+
+void ngx_strerror_uninit(void)
+{
+    u_char     *p;
+    ngx_err_t   err;
+
+    if (ngx_sys_errlist == NULL) {
+        return;
+    }
+
+    for (err = 0; err < NGX_SYS_NERR; err++) {
+        p = ngx_sys_errlist[err].data;
+        if (p != NULL) {
+            free(p);
+        }
+    }
+
+    free(ngx_sys_errlist);
+    ngx_sys_errlist = NULL;
+
+    return;
+}

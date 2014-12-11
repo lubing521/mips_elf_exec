@@ -69,6 +69,10 @@ ngx_time_init(void)
     ngx_time_update();
 }
 
+void ngx_time_uninit(void)
+{
+    return;
+}
 
 void
 ngx_time_update(void)

@@ -363,6 +363,20 @@ ngx_log_init(u_char *prefix)
 }
 
 
+void ngx_log_uninit(ngx_log_t *log)
+{
+    if (log == NULL) {
+        return;
+    }
+
+    if (log->file->fd > ngx_stderr) {
+        ngx_close_file(log->file->fd);
+    }
+
+    return;
+}
+
+
 ngx_int_t
 ngx_log_open_default(ngx_cycle_t *cycle)
 {

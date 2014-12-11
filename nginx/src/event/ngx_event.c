@@ -210,6 +210,10 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
 
     } else {
         timer = ngx_event_find_timer();
+        if (timer == NGX_TIMER_INFINITE) {
+            /* ZHAOYAO XXX: 对于没有ngx_timer_resolution的情况，强制设置2s定时器，便于检查是否exit */
+            timer = 2000;
+        }
         flags = NGX_UPDATE_TIME;
 
 #if (NGX_THREADS)
