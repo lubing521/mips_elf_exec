@@ -11,7 +11,7 @@
 ngx_int_t
 ngx_shm_alloc(ngx_shm_t *shm)
 {
-    shm->addr = (u_char *) kmalloc(shm->size, 0);
+    shm->addr = (u_char *) rgos_malloc(shm->size);
     if (shm->addr == NULL)
         return NGX_ERROR;
     
@@ -22,7 +22,7 @@ void
 ngx_shm_free(ngx_shm_t *shm)
 {
     if (shm->addr != NULL)
-        kfree(shm->addr);
+        rgos_free(shm->addr);
 }
 /*
 

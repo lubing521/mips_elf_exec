@@ -1,6 +1,6 @@
 CFLAGS := -mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-null-pointer-checks -fno-common -fno-schedule-insns2 -fdata-sections -ffunction-sections -EB -mabi=eabi -mlong32 -msoft-float -march=octeon -mno-octeon-useun -D_MIPS_SZLONG=32 -D_MIPS_SIM=5 -D_MIPS_SZINT=32 -D_MIPS_SZPTR=32 -DUSE_RUNTIME_MODEL_CHECKS=1 -DCVMX_ENABLE_PARAMETER_CHECKING=0 -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -DCVMX_ENABLE_POW_CHECKS=0
 
-CFLAGS += -I ../../10_4_3b13_cache/include -I ../../10_4_3b13_cache/project/main/rsr1002e-rsr2004e/conf
+CFLAGS += -I ../../10_4_3b13_cache/include -I ../../10_4_3b13_cache/project/main/rsr1002e-rsr2004e/conf -I std
 
 CC = mipsisa64-octeon-elf-gcc
 LINK = mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections
@@ -243,7 +243,8 @@ all_objects :=	src/core/nginx.o \
 	snoop_client/ngx_snoop_client.o \
 	snoop_client/sohu_lib.o \
 	snoop_client/yk_player_plugin.o \
-	snoop_client/yk_lib.o
+	snoop_client/yk_lib.o \
+	std/stdlib.o
 
 compile: $(all_objects)
 
@@ -1139,3 +1140,7 @@ snoop_client/yk_player_plugin.o: snoop_client/yk_player_plugin.c
 
 snoop_client/yk_lib.o: snoop_client/yk_lib.c
 	$(CC) -c $(CFLAGS) $(ALL_INCS) -o snoop_client/yk_lib.o snoop_client/yk_lib.c
+
+std/stdlib.o: std/stdlib.c
+	$(CC) -c $(CFLAGS) -o std/stdlib.o std/stdlib.c
+

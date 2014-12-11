@@ -179,7 +179,7 @@ static int sc_get_yk_video_tradition(char *origin_url)
     memset(yk_url, 0, sizeof(yk_url));
     sc_copy_url(yk_url, origin_url, HTTP_SP_URL_LEN_MAX, 0);
 
-    response = malloc(RESP_BUF_LEN);
+    response = rgos_malloc(RESP_BUF_LEN);
     if (response == NULL) {
         hc_log_error("Malloc failed");
         err = -1;
@@ -303,7 +303,7 @@ static int sc_get_yk_video_tradition(char *origin_url)
 
 out:
     if (response != NULL) {
-        free(response);
+        rgos_free(response);
         response = NULL;
     }
 

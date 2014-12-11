@@ -285,7 +285,7 @@ static yk_stream_info_t *yk_create_stream_info(const char *type)
         return NULL;
     }
 
-    p = malloc(sizeof(yk_stream_info_t));
+    p = rgos_malloc(sizeof(yk_stream_info_t));
     if (p == NULL) {
         hc_log_error("memory allocate %d bytes failed", sizeof(yk_stream_info_t));
     } else {
@@ -308,7 +308,7 @@ static yk_segment_info_t *yk_create_segment_info(char *info)
         return NULL;
     }
 
-    p = malloc(sizeof(yk_segment_info_t));
+    p = rgos_malloc(sizeof(yk_segment_info_t));
     if (p == NULL) {
         hc_log_error("memory allocate %d bytes failed", sizeof(yk_segment_info_t));
         return NULL;
@@ -381,7 +381,7 @@ static yk_segment_info_t *yk_create_segment_info(char *info)
     return p;
 
 err_out:
-    free(p);
+    rgos_free(p);
     hc_log_error("mal-formated segment info.");
 
     return NULL;
@@ -458,13 +458,13 @@ void yk_destroy_streams_all(yk_stream_info_t *streams[])
         if (streams[i]->segs != NULL) {
             for (j = 0; j < YK_STREAM_SEGS_MAX; j++) {
                 if (streams[i]->segs[j] != NULL) {
-                    free(streams[i]->segs[j]);
+                    rgos_free(streams[i]->segs[j]);
                     streams[i]->segs[j] = NULL;
                 }
             }
         }
 
-        free(streams[i]);
+        rgos_free(streams[i]);
         streams[i] = NULL;
     }
 }

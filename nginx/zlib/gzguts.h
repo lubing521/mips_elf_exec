@@ -41,8 +41,8 @@
 
 /* gz* functions always use library allocation functions */
 #ifndef STDC
-  extern voidp  malloc OF((uInt size));
-  extern void   free   OF((voidpf ptr));
+  extern voidp  rgos_malloc OF((uInt size));
+  extern void   rgos_free   OF((voidpf ptr));
 #endif
 
 /* get errno and strerror definition */

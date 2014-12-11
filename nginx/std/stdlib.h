@@ -1,13 +1,46 @@
-#ifndef _SSLVPN_STD_LIB_H_
-#define  _SSLVPN_STD_LIB_H_
+#ifndef __HOT_CACHE_STD_STDLIB_H__
+#define __HOT_CACHE_STD_STDLIB_H__
 
-#ifndef SSL_MALLOC
-#define SSL_MALLOC
-#define malloc(size)                kmalloc((size),0)
-#define free(ptr)                    kfree(ptr)
-#define remove(ptr)                        unlink(ptr)
-#endif
+#include <asm/atomic.h>
+#include <sys/slab.h>
 
-#endif
+extern atomic_t g_memory_alloc_counter;
 
+static inline void *rgos_malloc(size_t size)
+{
+    void *ptr;
+
+    ptr = kmalloc(size, 0);
+    if (ptr != NULL) {
+        atomic_inc(&g_memory_alloc_counter);
+    }
+
+    return ptr;
+}
+
+static inline void *rgos_calloc(size_t nmemb, size_t size)
+{
+    size_t total_size = nmemb * size;
+    void *ptr = kmalloc(total_size, 0);
+
+    if (ptr != NULL) {
+        atomic_inc(&g_memory_alloc_counter);
+        memset(ptr, 0, total_size);
+    }
+
+    return ptr;
+}
+
+static inline void rgos_free(void *ptr)
+{
+    atomic_dec(&g_memory_alloc_counter);
+    kfree(ptr);
+}
+
+static inline int rgos_remove(char *path)
+{
+    return unlink(path);
+}
+
+#endif /* __HOT_CACHE_STD_STDLIB_H__ */
 

@@ -321,7 +321,7 @@ ngx_log_init(u_char *prefix)
         }
 
         if (plen) {
-            name = malloc(plen + nlen + 2);
+            name = rgos_malloc(plen + nlen + 2);
             if (name == NULL) {
                 return NULL;
             }

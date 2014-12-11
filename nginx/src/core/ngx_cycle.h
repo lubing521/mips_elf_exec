@@ -112,7 +112,7 @@ typedef struct {
 
 
 typedef struct {
-     ngx_pool_t              *pool;   /* pcre's malloc() pool */
+     ngx_pool_t              *pool;   /* pcre's rgos_malloc() pool */
 } ngx_core_tls_t;
 
 

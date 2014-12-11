@@ -4,7 +4,6 @@
  */
 
 /* @(#) $Id$ */
-
 #include "zutil.h"
 
 #ifndef NO_DUMMY_DECL
@@ -292,9 +291,9 @@ void ZLIB_INTERNAL zcfree (voidpf opaque, voidpf ptr)
 #ifndef MY_ZCALLOC /* Any system without a special alloc function */
 
 #ifndef STDC
-extern voidp  malloc OF((uInt size));
-extern voidp  calloc OF((uInt items, uInt size));
-extern void   free   OF((voidpf ptr));
+extern voidp  rgos_malloc OF((uInt size));
+extern voidp  rgos_calloc OF((uInt items, uInt size));
+extern void   rgos_free   OF((voidpf ptr));
 #endif
 
 voidpf ZLIB_INTERNAL zcalloc (opaque, items, size)
@@ -303,15 +302,15 @@ voidpf ZLIB_INTERNAL zcalloc (opaque, items, size)
     unsigned size;
 {
     if (opaque) items += size - size; /* make compiler happy */
-    return sizeof(uInt) > 2 ? (voidpf)malloc(items * size) :
-                              (voidpf)calloc(items, size);
+    return sizeof(uInt) > 2 ? (voidpf)rgos_malloc(items * size) :
+                              (voidpf)rgos_calloc(items, size);
 }
 
 void ZLIB_INTERNAL zcfree (opaque, ptr)
     voidpf opaque;
     voidpf ptr;
 {
-    free(ptr);
+    rgos_free(ptr);
     if (opaque) return; /* make compiler happy */
 }
 

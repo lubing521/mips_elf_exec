@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include<limits.h>
+#include <limits.h>
 #include <string.h>
 #include <fcntl.h>
 
@@ -181,7 +181,7 @@ void create_adv_list(char *list_file)
                 add_adv_item_to_list(adv_item);
             }
             
-            adv_item = (adv_item_t *) malloc(sizeof(adv_item_t));
+            adv_item = (adv_item_t *) rgos_malloc(sizeof(adv_item_t));
             if (adv_item == NULL) {
                 /* error */
                 return;
@@ -239,7 +239,7 @@ int main()
 
     create_adv_list("adv_list.txt");
     
-    youku_andord_adv = (char *) malloc(1024);
+    youku_andord_adv = (char *) rgos_malloc(1024);
     if (youku_andord_adv == NULL) {
         return 0;
     }
@@ -254,7 +254,7 @@ int main()
     } 
 #endif
 
-    free(youku_andord_adv);
+    rgos_free(youku_andord_adv);
     return 0;
 }
 

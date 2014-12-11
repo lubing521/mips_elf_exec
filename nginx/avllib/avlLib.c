@@ -1206,18 +1206,18 @@ STATUS avlTreeErase(AVL_TREE * pRoot)
     if  (!(NULL == (*pRoot)->left))
         {
         avlTreeErase((AVL_TREE *)(&((*pRoot)->left)));
-        free((*pRoot)->left);
+        rgos_free((*pRoot)->left);
         (*pRoot)->left = NULL;
         }
 
     if  (!(NULL == (*pRoot)->right))
         {
         avlTreeErase((AVL_TREE *)(&((*pRoot)->right)));
-        free((*pRoot)->right);
+        rgos_free((*pRoot)->right);
         (*pRoot)->right = NULL;
         }
 
-    free(*pRoot);
+    rgos_free(*pRoot);
     *pRoot = NULL;
     return OK;
 	}
@@ -1247,18 +1247,18 @@ STATUS avlTreePrintErase(AVL_TREE * pRoot, void printNode(void * nodep))
     if  (!(NULL == (*pRoot)->left))
         {
         avlTreePrintErase((AVL_TREE *)(&((*pRoot)->left)), printNode);
-        free((*pRoot)->left);
+        rgos_free((*pRoot)->left);
         (*pRoot)->left = NULL;
         }
 
     if  (!(NULL == (*pRoot)->right))
         {
         avlTreePrintErase((AVL_TREE *)(&((*pRoot)->right)), printNode);
-        free((*pRoot)->right);
+        rgos_free((*pRoot)->right);
         (*pRoot)->right = NULL;
         }
 
-    free(*pRoot);
+    rgos_free(*pRoot);
     *pRoot = NULL;
     return OK;
 	}

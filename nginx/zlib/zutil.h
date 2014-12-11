@@ -13,6 +13,8 @@
 #ifndef ZUTIL_H
 #define ZUTIL_H
 
+#include <stdlib.h> /* ZHAOYAO XXX */
+
 #if ((__GNUC__-0) * 10 + __GNUC_MINOR__-0 >= 33) && !defined(NO_VIZ)
 #  define ZLIB_INTERNAL __attribute__((visibility ("hidden")))
 #else
@@ -243,20 +245,6 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  define Tracecv(c,x)
 
 #include <sys/fs_lib.h>
-#include <sys/slab.h>
-
-#define malloc(s) kmalloc(s, 0)
-#define free(s) kfree(s)
-
-static inline void *calloc(size_t count, size_t size)
-{
-    size_t  total_size = count * size;
-    void   *p = kmalloc(total_size, 0);
-    /*calloc 分配特征: 内存初始化为0 */
-    if (p)
-        memset(p, 0, total_size);
-    return p;
-}
 
 voidpf ZLIB_INTERNAL zcalloc OF((voidpf opaque, unsigned items,
                         unsigned size));

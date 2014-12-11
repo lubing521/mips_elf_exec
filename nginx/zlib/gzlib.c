@@ -2,7 +2,6 @@
  * Copyright (C) 2004, 2010 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
-
 #include "gzguts.h"
 #include "zutil.h"
 
@@ -93,7 +92,7 @@ local gzFile gz_open(path, fd, mode)
     gz_statep state;
 
     /* allocate gzFile structure to return */
-    state = malloc(sizeof(gz_state));
+    state = rgos_malloc(sizeof(gz_state));
     if (state == NULL)
         return NULL;
     state->size = 0;            /* no buffers allocated yet */
@@ -125,7 +124,7 @@ local gzFile gz_open(path, fd, mode)
                 break;
 #endif
             case '+':       /* can't read and write at the same time */
-                free(state);
+                rgos_free(state);
                 return NULL;
             case 'b':       /* ignore -- will request binary anyway */
                 break;
@@ -148,14 +147,14 @@ local gzFile gz_open(path, fd, mode)
 
     /* must provide an "r", "w", or "a" */
     if (state->mode == GZ_NONE) {
-        free(state);
+        rgos_free(state);
         return NULL;
     }
 
     /* save the path name for error messages */
-    state->path = malloc(strlen(path) + 1);
+    state->path = rgos_malloc(strlen(path) + 1);
     if (state->path == NULL) {
-        free(state);
+        rgos_free(state);
         return NULL;
     }
     strcpy(state->path, path);
@@ -177,8 +176,8 @@ local gzFile gz_open(path, fd, mode)
                         O_APPEND))),
             0666);
     if (state->fd == -1) {
-        free(state->path);
-        free(state);
+        rgos_free(state->path);
+        rgos_free(state);
         return NULL;
     }
     if (state->mode == GZ_APPEND)
@@ -221,11 +220,11 @@ gzFile ZEXPORT gzdopen(fd, mode)
     char *path;         /* identifier for error messages */
     gzFile gz;
 
-    if (fd == -1 || (path = malloc(7 + 3 * sizeof(int))) == NULL)
+    if (fd == -1 || (path = rgos_malloc(7 + 3 * sizeof(int))) == NULL)
         return NULL;
     sprintf(path, "<fd:%d>", fd);   /* for debugging */
     gz = gz_open(path, fd, mode);
-    free(path);
+    rgos_free(path);
     return gz;
 }
 
@@ -495,7 +494,7 @@ void ZLIB_INTERNAL gz_error(state, err, msg)
     /* free previously allocated message and clear */
     if (state->msg != NULL) {
         if (state->err != Z_MEM_ERROR)
-            free(state->msg);
+            rgos_free(state->msg);
         state->msg = NULL;
     }
 
@@ -511,7 +510,7 @@ void ZLIB_INTERNAL gz_error(state, err, msg)
     }
 
     /* construct error message with path */
-    if ((state->msg = malloc(strlen(state->path) + strlen(msg) + 3)) == NULL) {
+    if ((state->msg = rgos_malloc(strlen(state->path) + strlen(msg) + 3)) == NULL) {
         state->err = Z_MEM_ERROR;
         state->msg = (char *)"out of memory";
         return;

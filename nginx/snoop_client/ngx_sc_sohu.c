@@ -281,7 +281,7 @@ static int sc_get_sohu_video_m3u8(char *origin_url)
     memset(m3u8_url, 0, HTTP_SP_URL_LEN_MAX);
     sc_copy_url(m3u8_url, origin_url, HTTP_SP_URL_LEN_MAX, 0);
 
-    response = malloc(RESP_BUF_LEN);
+    response = rgos_malloc(RESP_BUF_LEN);
     if (response == NULL) {
         hc_log_error("allocate response buffer (%d bytes) failed", RESP_BUF_LEN);
         return -1;
@@ -332,7 +332,7 @@ static int sc_get_sohu_video_m3u8(char *origin_url)
     }
 
 out:
-    free(response);
+    rgos_free(response);
 
     return err;
 }

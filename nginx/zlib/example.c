@@ -501,8 +501,8 @@ int test(char *aa)
     printk("zlib version %s = 0x%04x, compile flags = 0x%lx\n",
             ZLIB_VERSION, ZLIB_VERNUM, zlibCompileFlags());
 
-    compr    = (unsigned char *)kmalloc((uInt)comprLen, 0);
-    uncompr  = (unsigned char *)kmalloc((uInt)uncomprLen, 0);
+    compr    = (unsigned char *)rgos_malloc((uInt)comprLen);
+    uncompr  = (unsigned char *)rgos_malloc((uInt)uncomprLen);
 
     memset(uncompr, 0, uncomprLen);
     memcpy(uncompr, aa, strlen(aa));
@@ -534,8 +534,8 @@ int test(char *aa)
 //    test_dict_deflate(compr, comprLen);
 //    test_dict_inflate(compr, comprLen, uncompr, uncomprLen);
 
-    free(compr);
-    free(uncompr);
+    rgos_free(compr);
+    rgos_free(uncompr);
 
     return 0;
 }

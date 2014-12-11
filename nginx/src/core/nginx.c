@@ -523,10 +523,15 @@ void dynload_entry()
 
 void dynload_exit()
 {
+    int mem_alloc_counter;
     printk("Exiting now.\r\n");
 //    return;
 
     hot_cache_destroy();
+
+    mem_alloc_counter = atomic_read(&g_memory_alloc_counter);
+
+    printk("Memory check: allocate counter %d.\r\n", mem_alloc_counter);
 }
 
 static char *getenv(const char *envvar)

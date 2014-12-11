@@ -3361,7 +3361,7 @@ void ngx_http_snooping_init(ngx_log_t *log)
 
     g_http_snooping_ctx.url_max = HTTP_SP_URL_MAX;
     g_http_snooping_ctx.url_free = g_http_snooping_ctx.url_max;
-    g_http_snooping_ctx.url_base = (http_snooping_url_t *)kmalloc(g_http_snooping_ctx.url_max * sizeof(http_snooping_url_t), 0);
+    g_http_snooping_ctx.url_base = (http_snooping_url_t *)rgos_malloc(g_http_snooping_ctx.url_max * sizeof(http_snooping_url_t));
     if (g_http_snooping_ctx.url_base == NULL) {
         err_step = 2;
         goto end_label;
@@ -3380,7 +3380,7 @@ void ngx_http_snooping_init(ngx_log_t *log)
     }
 
     g_http_snooping_ctx.con_max = 2048;
-    g_http_snooping_ctx.con_base = (http_sp_connection_t *)kmalloc(g_http_snooping_ctx.con_max * sizeof(http_sp_connection_t), 0); 
+    g_http_snooping_ctx.con_base = (http_sp_connection_t *)rgos_malloc(g_http_snooping_ctx.con_max * sizeof(http_sp_connection_t)); 
     if (g_http_snooping_ctx.con_base == NULL) {
         err_step = 3;
         goto end_label;
@@ -3404,13 +3404,13 @@ void ngx_http_snooping_init(ngx_log_t *log)
     INIT_LIST_HEAD(&g_http_snooping_ctx.data_buf_free_list);
     g_http_snooping_ctx.buf_max = HTTP_SP_BUF_NUM_MAX;
     g_http_snooping_ctx.buf_num = HTTP_SP_BUF_NUM_MAX;
-    g_http_snooping_ctx.data_buf_base[0] = (http_snooping_buf_t *)kmalloc(HTTP_SP_BUF_NUM_MAX * sizeof(http_snooping_buf_t) ,0);
+    g_http_snooping_ctx.data_buf_base[0] = (http_snooping_buf_t *)rgos_malloc(HTTP_SP_BUF_NUM_MAX * sizeof(http_snooping_buf_t));
     if (g_http_snooping_ctx.data_buf_base[0] == NULL) {
         err_step = 4;
         goto end_label;
     }
 /*
-    g_http_snooping_ctx.data_buf_base[1] = (http_snooping_buf_t *)kmalloc(HTTP_SP_BUF_NUM_MAX * sizeof(http_snooping_buf_t) ,0);
+    g_http_snooping_ctx.data_buf_base[1] = (http_snooping_buf_t *)rgos_malloc(HTTP_SP_BUF_NUM_MAX * sizeof(http_snooping_buf_t));
     if (g_http_snooping_ctx.data_buf_base[1] == NULL) {
         err_step = 5;
         goto end_label;
@@ -3502,17 +3502,17 @@ void ngx_http_snooping_uninit()
 
     /* ZHAOYAO TODO: 释放g_http_snooping_ctx.data_buf_base[0]空间, 注意数据面与控制面的锁 */
     list_del_init(&g_http_snooping_ctx.data_buf_free_list);
-    kfree(g_http_snooping_ctx.data_buf_base[0]);
+    rgos_free(g_http_snooping_ctx.data_buf_base[0]);
 
     /* ZHAOYAO TODO: 释放g_http_snooping_ctx.con_base空间, 注意数据面与控制面的锁 */
     list_del_init(&g_http_snooping_ctx.con_free_list);
     list_del_init(&g_http_snooping_ctx.con_use_list);
-    kfree(g_http_snooping_ctx.con_base);
+    rgos_free(g_http_snooping_ctx.con_base);
 
     /* ZHAOYAO TODO: 释放g_http_snooping_ctx.url_base空间, 注意数据面与控制面的锁 */
     list_del_init(&g_http_snooping_ctx.url_free_list);
     list_del_init(&g_http_snooping_ctx.url_use_list);
-    kfree(g_http_snooping_ctx.url_base);
+    rgos_free(g_http_snooping_ctx.url_base);
 
     /* ZHAOYAO TODO: 释放g_http_snooping_ctx.http_sp_url_pool池 */
     ngx_destroy_pool(g_http_snooping_ctx.http_sp_url_pool);

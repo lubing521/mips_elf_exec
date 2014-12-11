@@ -1,5 +1,6 @@
-#ifndef __SSLVPN_STD_LIMITES_H__
-#define __SSLVPN_STD_LIMITES_H__
+#ifndef __HOT_CACHE_STD_LIMITES_H__
+#define __HOT_CACHE_STD_LIMITES_H__
+
 #include <sys/kernel_fs/limits.h>
 
 #ifndef UCHAR_MAX
@@ -10,4 +11,5 @@
 #define USHRT_MAX 65535
 #endif
 
-#endif
+#endif /* __HOT_CACHE_STD_LIMITES_H__ */
+

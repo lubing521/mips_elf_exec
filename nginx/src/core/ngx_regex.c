@@ -72,8 +72,8 @@ static ngx_list_t  *ngx_pcre_studies;
 void
 ngx_regex_init(void)
 {
-    pcre_malloc = ngx_regex_malloc;
-    pcre_free = ngx_regex_free;
+//    pcre_malloc = ngx_regex_malloc;
+//    pcre_free = ngx_regex_free;
 }
 
 void ngx_regex_uninit(void)
@@ -278,6 +278,7 @@ ngx_regex_malloc(size_t size)
 static void ngx_libc_cdecl
 ngx_regex_free(void *p)
 {
+    rgos_free(p);
     return;
 }
 

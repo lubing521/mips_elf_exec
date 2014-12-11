@@ -52,12 +52,12 @@ ngx_strerror_init(void)
 
     /*
      * ngx_strerror() is not ready to work at this stage, therefore,
-     * malloc() is used and possible errors are logged using strerror().
+     * rgos_malloc() is used and possible errors are logged using strerror().
      */
 
     len = NGX_SYS_NERR * sizeof(ngx_str_t);
 
-    ngx_sys_errlist = malloc(len);
+    ngx_sys_errlist = rgos_malloc(len);
     if (ngx_sys_errlist == NULL) {
         goto failed;
     }
@@ -66,7 +66,7 @@ ngx_strerror_init(void)
         msg = strerror(err);
         len = ngx_strlen(msg);
 
-        p = malloc(len);
+        p = rgos_malloc(len);
         if (p == NULL) {
             goto failed;
         }
@@ -81,7 +81,7 @@ ngx_strerror_init(void)
 failed:
 
     err = errno;
-    ngx_log_stderr(0, "malloc(%uz) failed (%d: %s)", len, err, strerror(err));
+    ngx_log_stderr(0, "rgos_malloc(%uz) failed (%d: %s)", len, err, strerror(err));
 
     return NGX_ERROR;
 }
@@ -98,11 +98,11 @@ void ngx_strerror_uninit(void)
     for (err = 0; err < NGX_SYS_NERR; err++) {
         p = ngx_sys_errlist[err].data;
         if (p != NULL) {
-            free(p);
+            rgos_free(p);
         }
     }
 
-    free(ngx_sys_errlist);
+    rgos_free(ngx_sys_errlist);
     ngx_sys_errlist = NULL;
 
     return;

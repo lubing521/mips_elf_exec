@@ -1,4 +1,7 @@
-#ifndef __SSLVPN_STD_CTYPE_H__
-#define __SSLVPN_STD_CTYPE_H__
+#ifndef __HOT_CACHE_STD_CTYPE_H__
+#define __HOT_CACHE_STD_CTYPE_H__
+
 #include <sys/ctype.h>
-#endif
+
+#endif /* __HOT_CACHE_STD_CTYPE_H__ */
+

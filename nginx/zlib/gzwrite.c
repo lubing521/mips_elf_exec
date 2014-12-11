@@ -2,7 +2,6 @@
  * Copyright (C) 2004, 2005, 2010 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
-
 #include <sys/socket.h>
 #include "gzguts.h"
 #include "zutil.h"
@@ -21,15 +20,15 @@ local int gz_init(state)
     z_streamp strm = &(state->strm);
 
     /* allocate input and output buffers */
-    state->in = malloc(state->want);
-    state->out = malloc(state->want);
+    state->in = rgos_malloc(state->want);
+    state->out = rgos_malloc(state->want);
     if (state->in == NULL || state->out == NULL) {
         if (state->out != NULL) {
-            free(state->out);
+            rgos_free(state->out);
             state->out = NULL;
         }
         if (state->in != NULL) {
-            free(state->in);
+            rgos_free(state->in);
             state->in = NULL;
         }
         gz_error(state, Z_MEM_ERROR, "out of memory");
@@ -43,9 +42,9 @@ local int gz_init(state)
     ret = deflateInit2(strm, state->level, Z_DEFLATED,
                        15 + 16, 8, state->strategy);
     if (ret != Z_OK) {
-        free(state->in);
+        rgos_free(state->in);
         state->in = NULL;
-        free(state->out);
+        rgos_free(state->out);
         state->out = NULL;
         gz_error(state, Z_MEM_ERROR, "out of memory");
         return -1;
@@ -533,15 +532,15 @@ int ZEXPORT gzclose_w(file)
         ret += gz_comp(state, Z_FINISH);
         (void)deflateEnd(&(state->strm));
         if (state->out != NULL) {
-            free(state->out);
+            rgos_free(state->out);
         }
         if (state->in != NULL) {
-            free(state->in);
+            rgos_free(state->in);
         }
     }
     gz_error(state, Z_OK, NULL);
-    free(state->path);
+    rgos_free(state->path);
     ret += close(state->fd);
-    free(state);
+    rgos_free(state);
     return ret ? Z_ERRNO : Z_OK;
 }
