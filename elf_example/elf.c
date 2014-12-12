@@ -22,6 +22,8 @@ void dynload_entry()
     struct sockaddr_in sa;
     void *ptr;
 
+    printk("hehehehehehehehhehe\r\n");
+
     memset(&sa, 0, sizeof(sa));
     ret = inet_pton(AF_INET, host, &sa.sin_addr);
     if (ret != 1) {
@@ -66,6 +68,7 @@ void dynload_entry()
 
 void dynload_exit()
 {
+    printk("xixixixixiix\r\n");
     if (sockfd == -1) {
         printk("Invalid sockfd.\r\n");
     } else {

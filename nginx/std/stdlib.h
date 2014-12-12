@@ -23,6 +23,8 @@ static inline void *rgos_calloc(size_t nmemb, size_t size)
     size_t total_size = nmemb * size;
     void *ptr = kmalloc(total_size, 0);
 
+    printk_rt("%s<%d>\r\n", __func__, __LINE__);
+
     if (ptr != NULL) {
         atomic_inc(&g_memory_alloc_counter);
         memset(ptr, 0, total_size);

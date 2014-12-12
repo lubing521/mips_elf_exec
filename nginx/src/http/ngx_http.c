@@ -1512,14 +1512,16 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
                                   NGX_HASH_WILDCARD_KEY);
 
             if (rc == NGX_ERROR) {
-                return NGX_ERROR;
+//                return NGX_ERROR;
+                goto failed;
             }
 
             if (rc == NGX_DECLINED) {
                 ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
                               "invalid server name or wildcard \"%V\" on %s",
                               &name[n].name, addr->opt.addr);
-                return NGX_ERROR;
+//                return NGX_ERROR;
+                goto failed;
             }
 
             if (rc == NGX_BUSY) {
@@ -1538,6 +1540,7 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
 
     if (ha.keys.nelts) {
         hash.hash = &addr->hash;
+        ngx_destroy_pool(hash.temp_pool);
         hash.temp_pool = NULL;
 
         if (ngx_hash_init(&hash, ha.keys.elts, ha.keys.nelts) != NGX_OK) {
@@ -1551,6 +1554,7 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
                   sizeof(ngx_hash_key_t), ngx_http_cmp_dns_wildcards);
 
         hash.hash = NULL;
+        ngx_destroy_pool(hash.temp_pool);
         hash.temp_pool = ha.temp_pool;
 
         if (ngx_hash_wildcard_init(&hash, ha.dns_wc_head.elts,
@@ -1569,6 +1573,7 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
                   sizeof(ngx_hash_key_t), ngx_http_cmp_dns_wildcards);
 
         hash.hash = NULL;
+        ngx_destroy_pool(hash.temp_pool);
         hash.temp_pool = ha.temp_pool;
 
         if (ngx_hash_wildcard_init(&hash, ha.dns_wc_tail.elts,

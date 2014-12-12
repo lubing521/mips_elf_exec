@@ -9,6 +9,8 @@
 #include <ngx_core.h>
 #include <ngx_event.h>
 
+#include <asm/atomic.h>
+
 
 #define NGX_RESOLVER_UDP_SIZE   4096
 
@@ -100,6 +102,7 @@ static ngx_resolver_node_t *ngx_resolver_lookup_addr6(ngx_resolver_t *r,
     struct in6_addr *addr, uint32_t hash);
 #endif
 
+atomic_t g_mem_counter_ngx_resolver_c = ATOMIC_INIT(0);
 
 ngx_resolver_t *
 ngx_resolver_create(ngx_conf_t *cf, ngx_str_t *names, ngx_uint_t n)
@@ -2841,6 +2844,9 @@ ngx_resolver_alloc(ngx_resolver_t *r, size_t size)
     /* lock alloc mutex */
 
     p = ngx_alloc(size, r->log);
+    if (p != NULL) {
+        atomic_inc(&g_mem_counter_ngx_resolver_c);
+    }
 
     /* unlock alloc mutex */
 
@@ -2868,6 +2874,9 @@ ngx_resolver_free(ngx_resolver_t *r, void *p)
 {
     /* lock alloc mutex */
 
+    if (p != NULL) {
+        atomic_dec(&g_mem_counter_ngx_resolver_c);
+    }
     ngx_free(p);
 
     /* unlock alloc mutex */
@@ -2877,6 +2886,9 @@ ngx_resolver_free(ngx_resolver_t *r, void *p)
 static void
 ngx_resolver_free_locked(ngx_resolver_t *r, void *p)
 {
+    if (p != NULL) {
+        atomic_dec(&g_mem_counter_ngx_resolver_c);
+    }
     ngx_free(p);
 }
 

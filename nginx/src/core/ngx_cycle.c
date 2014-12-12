@@ -303,6 +303,8 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     if (ngx_process == NGX_PROCESS_SIGNALLER) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
+        /* ZHAOYAO XXX: 此处释放不用的pool，避免内存泄露 */
+        ngx_destroy_pool(conf.temp_pool);
         return cycle;
     }
 
@@ -748,6 +750,7 @@ old_shm_zone_done:
     }
 
     ngx_destroy_pool(conf.temp_pool);
+    conf.temp_pool = NULL;
 
     if (ngx_process == NGX_PROCESS_MASTER || ngx_is_init_cycle(old_cycle)) {
         /* ZHAOYAO XXX: 我们其实在这里就返回了。 */

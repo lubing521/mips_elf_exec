@@ -8,11 +8,13 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
+#include <asm/atomic.h>
+
+atomic_t g_mem_counter_ngx_alloc_c = ATOMIC_INIT(0);
 
 ngx_uint_t  ngx_pagesize;
 ngx_uint_t  ngx_pagesize_shift;
 ngx_uint_t  ngx_cacheline_size;
-
 
 void *
 ngx_alloc(size_t size, ngx_log_t *log)
@@ -23,6 +25,8 @@ ngx_alloc(size_t size, ngx_log_t *log)
     if (p == NULL) {
         ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
                       "rgos_malloc(%uz) failed", size);
+    } else {
+        atomic_inc(&g_mem_counter_ngx_alloc_c);
     }
 
     ngx_log_debug2(NGX_LOG_DEBUG_ALLOC, log, 0, "rgos_malloc: %p:%uz", p, size);
@@ -43,6 +47,15 @@ ngx_calloc(size_t size, ngx_log_t *log)
     }
 
     return p;
+}
+
+void
+ngx_free(void *ptr)
+{
+    if (ptr != NULL) {
+        atomic_dec(&g_mem_counter_ngx_alloc_c);
+        rgos_free(ptr);
+    }
 }
 
 

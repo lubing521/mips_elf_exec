@@ -521,6 +521,11 @@ void dynload_entry()
     hot_cache();
 }
 
+extern atomic_t g_mem_counter_ngx_shmem_c;
+extern atomic_t g_mem_counter_ngx_alloc_c;
+extern atomic_t g_mem_counter_ngx_resolver_c;
+extern atomic_t g_mem_counter_ngx_palloc_c;
+
 void dynload_exit()
 {
     int mem_alloc_counter;
@@ -530,8 +535,19 @@ void dynload_exit()
     hot_cache_destroy();
 
     mem_alloc_counter = atomic_read(&g_memory_alloc_counter);
+    printk("Memory check: allocate total counter %d.\r\n", mem_alloc_counter);
 
-    printk("Memory check: allocate counter %d.\r\n", mem_alloc_counter);
+    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_shmem_c);
+    printk("Memory check: ngx_shm_alloc and ngx_shm_free counter %d.\r\n", mem_alloc_counter);
+
+    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_alloc_c);
+    printk("Memory check: ngx_alloc and ngx_free counter %d.\r\n", mem_alloc_counter);
+
+    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_resolver_c);
+    printk("Memory check: ngx_resolver_alloc and ngx_resolver_free counter %d.\r\n", mem_alloc_counter);
+
+    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_palloc_c);
+    printk("Memory check: ngx_create_pool and ngx_destroy_pool counter %d.\r\n", mem_alloc_counter);
 }
 
 static char *getenv(const char *envvar)

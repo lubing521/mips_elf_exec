@@ -8,22 +8,30 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
+#include <asm/atomic.h>
+
+atomic_t g_mem_counter_ngx_shmem_c = ATOMIC_INIT(0);
+
 ngx_int_t
 ngx_shm_alloc(ngx_shm_t *shm)
 {
     shm->addr = (u_char *) rgos_malloc(shm->size);
     if (shm->addr == NULL)
         return NGX_ERROR;
-    
+
+    atomic_inc(&g_mem_counter_ngx_shmem_c);
     return NGX_OK;
 }
 
 void
 ngx_shm_free(ngx_shm_t *shm)
 {
-    if (shm->addr != NULL)
+    if (shm->addr != NULL) {
+        atomic_dec(&g_mem_counter_ngx_shmem_c);
         rgos_free(shm->addr);
+    }
 }
+
 /*
 
 #if (NGX_HAVE_MAP_ANON)

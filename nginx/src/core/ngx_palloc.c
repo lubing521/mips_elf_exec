@@ -8,9 +8,13 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
+#include <asm/atomic.h>
+
 
 static void *ngx_palloc_block(ngx_pool_t *pool, size_t size);
 static void *ngx_palloc_large(ngx_pool_t *pool, size_t size);
+
+atomic_t g_mem_counter_ngx_palloc_c = ATOMIC_INIT(0);
 
 
 ngx_pool_t *
@@ -22,6 +26,8 @@ ngx_create_pool(size_t size, ngx_log_t *log)
     if (p == NULL) {
         return NULL;
     }
+
+    atomic_inc(&g_mem_counter_ngx_palloc_c);
 
     p->d.last = (u_char *) p + sizeof(ngx_pool_t);
     p->d.end = (u_char *) p + size;
@@ -51,6 +57,8 @@ ngx_destroy_pool(ngx_pool_t *pool)
     if (pool == NULL) {
         return;
     }
+
+    atomic_dec(&g_mem_counter_ngx_palloc_c);
 
     for (c = pool->cleanup; c; c = c->next) {
         if (c->handler) {

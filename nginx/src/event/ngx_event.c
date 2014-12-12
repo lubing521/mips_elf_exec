@@ -23,7 +23,9 @@ extern ngx_module_t ngx_select_module;
 
 static char *ngx_event_init_conf(ngx_cycle_t *cycle, void *conf);
 static ngx_int_t ngx_event_module_init(ngx_cycle_t *cycle);
+static void ngx_event_module_exit(ngx_cycle_t *cycle);
 static ngx_int_t ngx_event_process_init(ngx_cycle_t *cycle);
+static void ngx_event_process_exit(ngx_cycle_t *cycle);
 static char *ngx_events_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 static char *ngx_event_connections(ngx_conf_t *cf, ngx_command_t *cmd,
@@ -192,8 +194,8 @@ ngx_module_t  ngx_event_core_module = {
     ngx_event_process_init,                /* init process */
     NULL,                                  /* init thread */
     NULL,                                  /* exit thread */
-    NULL,                                  /* exit process */
-    NULL,                                  /* exit master */
+    ngx_event_process_exit,                /* exit process */
+    ngx_event_module_exit,                 /* exit master */
     NGX_MODULE_V1_PADDING
 };
 
@@ -441,6 +443,8 @@ ngx_event_init_conf(ngx_cycle_t *cycle, void *conf)
     return NGX_CONF_OK;
 }
 
+/* ZHAOYAO XXX: 在卸载模块时，要释放共享内存，因此将其改为全局变量 */
+static ngx_shm_t g_ngx_event_module_shm = {0};
 
 static ngx_int_t
 ngx_event_module_init(ngx_cycle_t *cycle)
@@ -448,7 +452,7 @@ ngx_event_module_init(ngx_cycle_t *cycle)
     void              ***cf;
     u_char              *shared;
     size_t               size, cl;
-    ngx_shm_t            shm;
+//    ngx_shm_t            shm;
     ngx_time_t          *tp;
     ngx_core_conf_t     *ccf;
     ngx_event_conf_t    *ecf;
@@ -522,16 +526,16 @@ ngx_event_module_init(ngx_cycle_t *cycle)
 
 #endif
 
-    shm.size = size;
-    shm.name.len = sizeof("nginx_shared_zone");
-    shm.name.data = (u_char *) "nginx_shared_zone";
-    shm.log = cycle->log;
+    g_ngx_event_module_shm.size = size;
+    g_ngx_event_module_shm.name.len = sizeof("nginx_shared_zone");
+    g_ngx_event_module_shm.name.data = (u_char *) "nginx_shared_zone";
+    g_ngx_event_module_shm.log = cycle->log;
 
-    if (ngx_shm_alloc(&shm) != NGX_OK) {
+    if (ngx_shm_alloc(&g_ngx_event_module_shm) != NGX_OK) {
         return NGX_ERROR;
     }
 
-    shared = shm.addr;
+    shared = g_ngx_event_module_shm.addr;
 
     ngx_accept_mutex_ptr = (ngx_atomic_t *) shared;
     ngx_accept_mutex.spin = (ngx_uint_t) -1;
@@ -572,6 +576,22 @@ ngx_event_module_init(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
+static void
+ngx_event_module_exit(ngx_cycle_t *cycle)
+{
+    u_char *ptr;
+
+    ptr = g_ngx_event_module_shm.addr;
+    if (ptr == ngx_accept_mutex_ptr) {
+        ngx_accept_mutex_ptr = NULL;
+    } else {
+        printk("BUG %s<%d>: ngx_accept_mutex_ptr<0x%p> is touched by others.\r\n",
+                    __func__, __LINE__, ngx_accept_mutex_ptr);
+    }
+
+    ngx_shm_free(&g_ngx_event_module_shm);
+    memset(&g_ngx_event_module_shm, 0, sizeof(g_ngx_event_module_shm));
+}
 
 #if !(NGX_WIN32)
 
@@ -867,6 +887,33 @@ ngx_event_process_init(ngx_cycle_t *cycle)
     return NGX_OK;
 }
 
+
+static void
+ngx_event_process_exit(ngx_cycle_t *cycle)
+{
+#if 0
+    ngx_uint_t i, conn_num;
+    ngx_connection_t *c;
+
+    printk("%s<%d>.\r\n", __func__, __LINE__);
+
+    /* ZHAOYAO XXX: 清理连接 */
+    conn_num = cycle->connection_n;
+    c = cycle->connections;
+    printk_rt("%s<%d>: to clear all connections...\r\n", __func__, __LINE__);
+    for (i = 0; i < conn_num; i++) {
+        ngx_close_connection(&c[i]);
+    }
+    printk_rt("%s<%d>: clear all connections completed.\r\n", __func__, __LINE__);
+#endif
+
+    ngx_free(cycle->write_events);
+    cycle->write_events = NULL;
+    ngx_free(cycle->read_events);
+    cycle->read_events = NULL;
+    ngx_free(cycle->connections);
+    cycle->connections = NULL;
+}
 
 ngx_int_t
 ngx_send_lowat(ngx_connection_t *c, size_t lowat)

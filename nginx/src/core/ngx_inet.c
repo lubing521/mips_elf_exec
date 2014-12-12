@@ -1104,13 +1104,13 @@ ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
     in_addr = ngx_inet_addr(u->host.data, u->host.len);
 
     if (in_addr == INADDR_NONE) {
+#if 0
         host = ngx_alloc(u->host.len + 1, pool->log);
         if (host == NULL) {
             return NGX_ERROR;
         }
 
         (void) ngx_cpystrn(host, u->host.data, u->host.len + 1);
-#if 0
         h = gethostbyname((char *) host);
 
         ngx_free(host);

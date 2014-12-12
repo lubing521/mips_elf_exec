@@ -221,7 +221,6 @@ all_objects :=	src/core/nginx.o \
 	zlib/compress.o \
 	zlib/crc32.o \
 	zlib/deflate.o \
-	zlib/example.o \
 	zlib/gzclose.o \
 	zlib/gzlib.o \
 	zlib/gzread.o \
@@ -245,6 +244,7 @@ all_objects :=	src/core/nginx.o \
 	snoop_client/yk_player_plugin.o \
 	snoop_client/yk_lib.o \
 	std/stdlib.o
+#	zlib/example.o \
 
 compile: $(all_objects)
 
