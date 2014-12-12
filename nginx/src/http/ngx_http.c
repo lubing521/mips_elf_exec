@@ -1541,8 +1541,6 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
 
     if (ha.keys.nelts) {
         hash.hash = &addr->hash;
-        rgos_dbg("destroy pool 0x%p", hash.temp_pool);
-        ngx_destroy_pool(hash.temp_pool);
         hash.temp_pool = NULL;
 
         if (ngx_hash_init(&hash, ha.keys.elts, ha.keys.nelts) != NGX_OK) {
@@ -1556,8 +1554,6 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
                   sizeof(ngx_hash_key_t), ngx_http_cmp_dns_wildcards);
 
         hash.hash = NULL;
-        rgos_dbg("destroy pool 0x%p", hash.temp_pool);
-        ngx_destroy_pool(hash.temp_pool);
         hash.temp_pool = ha.temp_pool;
 
         if (ngx_hash_wildcard_init(&hash, ha.dns_wc_head.elts,
@@ -1576,8 +1572,6 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
                   sizeof(ngx_hash_key_t), ngx_http_cmp_dns_wildcards);
 
         hash.hash = NULL;
-        rgos_dbg("destroy pool 0x%p", hash.temp_pool);
-        ngx_destroy_pool(hash.temp_pool);
         hash.temp_pool = ha.temp_pool;
 
         if (ngx_hash_wildcard_init(&hash, ha.dns_wc_tail.elts,
