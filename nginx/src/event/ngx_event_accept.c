@@ -161,6 +161,7 @@ ngx_event_accept(ngx_event_t *ev)
             ngx_close_accepted_connection(c);
             return;
         }
+        rgos_dbg("create pool 0x%p", c->pool);
 
         c->sockaddr = ngx_palloc(c->pool, socklen);
         if (c->sockaddr == NULL) {
@@ -490,6 +491,7 @@ ngx_close_accepted_connection(ngx_connection_t *c)
     }
 
     if (c->pool) {
+        rgos_dbg("destroy pool 0x%p", c->pool);
         ngx_destroy_pool(c->pool);
         c->pool = NULL;
     }

@@ -1098,6 +1098,7 @@ ngx_worker_process_exit(ngx_cycle_t *cycle)
     ngx_exit_cycle.files_n = ngx_cycle->files_n;
     ngx_cycle = &ngx_exit_cycle;
 
+    rgos_dbg("destroy pool 0x%p", cycle->pool);
     ngx_destroy_pool(cycle->pool);
 
     ngx_log_error(NGX_LOG_NOTICE, ngx_cycle->log, 0, "exit");

@@ -425,6 +425,7 @@ ngx_http_upstream_keepalive_close(ngx_connection_t *c)
 
 #endif
 
+    rgos_dbg("destroy pool 0x%p", c->pool);
     ngx_destroy_pool(c->pool);
     ngx_close_connection(c);
 }

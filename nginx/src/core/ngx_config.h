@@ -21,6 +21,8 @@ typedef int sig_atomic_t;
 typedef unsigned long size_t;
 #endif
 
+#include <rgos_std.h>
+
 #include <ngx_auto_headers.h>
 
 

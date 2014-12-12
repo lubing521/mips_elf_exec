@@ -278,6 +278,7 @@ ngx_http_spdy_init(ngx_event_t *rev)
         ngx_http_close_connection(c);
         return;
     }
+    rgos_dbg("create pool 0x%p", sc->pool);
 
     cln = ngx_pool_cleanup_add(c->pool, sizeof(ngx_pool_cleanup_file_t));
     if (cln == NULL) {
@@ -578,6 +579,7 @@ ngx_http_spdy_handle_connection(ngx_http_spdy_connection_t *sc)
         return;
     }
 
+    rgos_dbg("destroy pool 0x%p", sc->pool);
     ngx_destroy_pool(sc->pool);
 
     sc->pool = NULL;
@@ -2795,6 +2797,7 @@ ngx_http_spdy_keepalive_handler(ngx_event_t *rev)
         ngx_http_close_connection(c);
         return;
     }
+    rgos_dbg("create pool 0x%p", sc->pool);
 
     sc->streams_index = ngx_pcalloc(sc->pool,
                                     ngx_http_spdy_streams_index_size(sscf)
@@ -2885,6 +2888,7 @@ ngx_http_spdy_pool_cleanup(void *data)
     ngx_http_spdy_connection_t  *sc = data;
 
     if (sc->pool) {
+        rgos_dbg("destroy pool 0x%p", sc->pool);
         ngx_destroy_pool(sc->pool);
     }
 }
