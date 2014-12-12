@@ -441,7 +441,7 @@ ngx_main(ulong argc, void *argv)
         printk("%s-%d: everything is fine.\r\n", __FILE__, __LINE__);
         ngx_single_process_cycle(cycle);
     } else {
-        ngx_master_process_cycle(cycle);
+//        ngx_master_process_cycle(cycle);
     }
 
 err_out9:

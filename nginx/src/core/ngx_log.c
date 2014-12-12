@@ -356,7 +356,7 @@ ngx_log_init(u_char *prefix)
     }
 
     if (p) {
-        ngx_free(p);
+        rgos_free(p);
     }
 
     return &ngx_log;
