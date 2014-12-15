@@ -1,4 +1,22 @@
 #!/bin/bash
 
-make probe 2>&1 | grep "undefined reference to" | awk '{print $5}' | sort -u | sed "s/'//g" | sed "s/\`//g" | awk '{print "void *"$1" = (void *)0x0;"}' > sym_stub.c
-rm *.o
+STUB_CODE="sym_stub.c"
+STUB_CODE_TEMP="$STUB_CODE.temp"
+
+all_sym=$(make probe 2>&1 | grep "undefined reference to" | awk '{print $5}' | sort -u | sed "s/'//g" | sed "s/\`//g")
+
+rm -f $STUB_CODE_TEMP
+
+for i in $all_sym; do
+    j=$(grep -w $i ../symbol_table.txt)
+    if [ $? != 0 ]; then
+        echo "Error: Not find $i in symbol table."
+        rm -f $STUB_CODE_TEMP
+        exit 1
+    fi
+    k=$(echo $j | awk '{print "0x"$1}')
+    line="void *$i = (void *)$k;"
+    echo $line >> $STUB_CODE_TEMP
+done
+
+mv $STUB_CODE_TEMP $STUB_CODE

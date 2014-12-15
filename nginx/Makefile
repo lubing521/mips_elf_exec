@@ -5,13 +5,10 @@ CFLAGS += -I ../../10_4_3b13_cache/include -I ../../10_4_3b13_cache/project/main
 CC = mipsisa64-octeon-elf-gcc
 LINK = mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections
 
-default: gen_sym_stub parse compile convert link
+default: gen_sym_stub convert link
 
 gen_sym_stub:
 	../tools/gen_sym_stub
-
-parse:
-	../tools/parser ../symbol_table.txt
 	$(CC) $(CFLAGS) -c sym_stub.c -o sym_stub.o
 	mv sym_stub.c sym_stub.c.debug
 

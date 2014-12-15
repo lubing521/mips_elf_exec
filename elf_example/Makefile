@@ -2,13 +2,10 @@ cflags := -mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-
 
 cflags += -I ../../10_4_3b13_cache/include -I ../../10_4_3b13_cache/project/main/rsr1002e-rsr2004e/conf 
 
-default: gen_sym_stub parse compile convert link
+default: gen_sym_stub compile convert link
 
 gen_sym_stub:
 	../tools/gen_sym_stub
-
-parse:
-	../tools/parser ../symbol_table.txt
 
 compile:
 	mipsisa64-octeon-elf-gcc $(cflags) -c elf.c -o elf.o
