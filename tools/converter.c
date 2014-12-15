@@ -3,7 +3,7 @@
 #include <string.h>
 #include <endian.h>
 
-#include "utils.h"
+#include "converter.h"
 #include "elf.h"
 
 #define ELF_FILE_BUFLEN (1<<20)  /* temporary buffer for loading ELF executable file */

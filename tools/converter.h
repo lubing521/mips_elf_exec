@@ -17,7 +17,7 @@ typedef uint32_t addr_t; /* 目标设备的地址指针类型 */
     } while (0)
 
 #define DBG(fmt, arg...) \
-        do { \
-            fprintf(stdout, "*DBG* : " fmt "\n", ##arg); \
-        } while (0)
+    do { \
+        fprintf(stdout, "*DBG* : " fmt "\n", ##arg); \
+    } while (0)
 
