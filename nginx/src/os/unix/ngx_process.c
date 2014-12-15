@@ -92,8 +92,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
     u_long     on;
     ngx_pid_t  pid;
     ngx_int_t  s;
-    printk("%s-%d task %s create %p respawn = %d\r\n", 
-           __FILE__, __LINE__, name, proc, respawn);
+    rgos_dbg("task %s create %p respawn = %d.", name, proc, respawn);
     if (respawn >= 0) {
         s = respawn;
 
@@ -108,7 +107,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                           "no more than %d processes can be spawned",
                           NGX_MAX_PROCESSES);
-            printk("%s-%d %s %p %d\r\n", __FILE__, __LINE__, name, proc, s);
+            rgos_err("%s %p %d failed, reach the limit of process.\r\n", name, proc, s);
             return NGX_INVALID_PID;
         }
     }
@@ -190,7 +189,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
 #endif
     ngx_process_slot = s;
     task_t ngx_task;
-    printk("%s-%d task %s create %p\r\n", __FILE__, __LINE__, name, proc);
+    rgos_dbg("task %s create %p.", name, proc);
     ngx_task = create_task(name, proc, 0, NULL,
         (64 * 1024), APP_TASK);
     if (ngx_task == NULL){

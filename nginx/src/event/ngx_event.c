@@ -585,8 +585,7 @@ ngx_event_module_exit(ngx_cycle_t *cycle)
     if (ptr == ngx_accept_mutex_ptr) {
         ngx_accept_mutex_ptr = NULL;
     } else {
-        printk("BUG %s<%d>: ngx_accept_mutex_ptr<0x%p> is touched by others.\r\n",
-                    __func__, __LINE__, ngx_accept_mutex_ptr);
+        rgos_err("ngx_accept_mutex_ptr<0x%p> is touched by others.", ngx_accept_mutex_ptr);
     }
 
     ngx_shm_free(&g_ngx_event_module_shm);
@@ -898,16 +897,16 @@ ngx_event_process_exit(ngx_cycle_t *cycle)
     ngx_uint_t i, conn_num;
     ngx_connection_t *c;
 
-    printk("%s<%d>.\r\n", __func__, __LINE__);
+    rgos_err("Failed.");
 
     /* ZHAOYAO XXX: 清理连接 */
     conn_num = cycle->connection_n;
     c = cycle->connections;
-    printk_rt("%s<%d>: to clear all connections...\r\n", __func__, __LINE__);
+    rgos_dbg("Clearing all connections...");
     for (i = 0; i < conn_num; i++) {
         ngx_close_connection(&c[i]);
     }
-    printk_rt("%s<%d>: clear all connections completed.\r\n", __func__, __LINE__);
+    rgos_dbg("Clear all connections completed.");
 #endif
 
     ngx_free(cycle->write_events);

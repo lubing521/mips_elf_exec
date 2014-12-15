@@ -401,13 +401,7 @@ ngx_conf_bitmask_t  ngx_http_upstream_ignore_headers_masks[] = {
     { ngx_null_string, 0 }
 };
 
-
-void ngx_dbg_loc(char *s, int d)
-{
-    printk_rt("%s - %d\n", s, d);
-    TRACE_SF();
-}
-
+#if 0
 void ngx_dbg_conn_peer_info(ngx_peer_connection_t *peer, char *s, int d)
 {
     struct sockaddr_in *add_in;
@@ -471,6 +465,7 @@ return;
 
     TRACE_SF();
 }
+#endif
 
 ngx_int_t
 ngx_http_upstream_create(ngx_http_request_t *r)

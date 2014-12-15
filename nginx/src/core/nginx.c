@@ -211,7 +211,7 @@ ngx_main(ulong argc, void *argv)
 //    ngx_debug_init();
 
     if (ngx_strerror_init() != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Initialize strerror failed.");
         ret = 1;
         goto err_out0;
     }
@@ -290,7 +290,7 @@ ngx_main(ulong argc, void *argv)
 
     log = ngx_log_init(ngx_prefix);
     if (log == NULL) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Initialize log failed.");
         ret = 1;
         goto err_out3;
     }
@@ -314,7 +314,7 @@ ngx_main(ulong argc, void *argv)
 
     init_cycle.pool = ngx_create_pool(1024, log);
     if (init_cycle.pool == NULL) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Create init_cycle.pool failed.");
         ret = 1;
         goto err_out5;
     }
@@ -325,13 +325,13 @@ ngx_main(ulong argc, void *argv)
     }*/
 
     if (ngx_process_options(&init_cycle) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Process options failed.");
         ret = 1;
         goto err_out6;
     }
 
     if (ngx_os_init(log) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Initialize OS failed.");
         ret = 1;
         goto err_out6;
     }
@@ -340,14 +340,14 @@ ngx_main(ulong argc, void *argv)
      * ngx_crc32_table_init() requires ngx_cacheline_size set in ngx_os_init()
      */
     if (ngx_crc32_table_init() != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Initialize CRC32 table failed.");
         ret = 1;
         goto err_out7;
     }
 
 #if 0
     if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Inherit sockets failed.");
         return 1;
     }
 #endif
@@ -363,7 +363,7 @@ ngx_main(ulong argc, void *argv)
             ngx_log_stderr(0, "configuration file %s test failed",
                            init_cycle.conf_file.data);
         }
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Initialize cycle failed.");
         ret = 1;
         goto err_out8;
     }
@@ -417,13 +417,13 @@ ngx_main(ulong argc, void *argv)
 #endif
 */
     if (ngx_create_pidfile(&ccf->pid, cycle->log) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Create pid file failed.", __FILE__, __LINE__);
         ret = 1;
         goto err_out9;
     }
 
     if (ngx_log_redirect_stderr(cycle) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Redirect log to stderr failed.");
         ret = 1;
         goto err_out9;
     }
@@ -438,7 +438,7 @@ ngx_main(ulong argc, void *argv)
     ngx_use_stderr = 0;
     ngx_process = NGX_PROCESS_SINGLE; //tangyoucan
     if (ngx_process == NGX_PROCESS_SINGLE) {
-        printk("%s-%d: everything is fine.\r\n", __FILE__, __LINE__);
+        rgos_dbg("Everything is fine.");
         ngx_single_process_cycle(cycle);
     } else {
 //        ngx_master_process_cycle(cycle);
@@ -482,7 +482,7 @@ err_out0:
 static void hot_cache()
 {
     if (g_hot_cache_task != NULL) {
-        printk("Hot Cache task entity is already running...\r\n");
+        printf("Hot Cache task entity is already running...\r\n");
         return;
     }
 
@@ -493,7 +493,7 @@ static void hot_cache()
                                     (128 * 1024),
                                     APP_TASK);
     if (g_hot_cache_task == NULL){
-        printk("Create Hot Cache task failed.\r\n");
+        printf("Create Hot Cache task failed.\r\n");
     }
 
     return ;
@@ -509,7 +509,7 @@ static void hot_cache_destroy()
 
     sleep(20 * HZ);
 
-    printk_rt("%s<%d>: deleting g_hot_cache_task.\r\n", __func__, __LINE__);
+    rgos_dbg("Deleting g_hot_cache_task...");
     delete_task(g_hot_cache_task);
     g_hot_cache_task = NULL;
 
@@ -531,25 +531,25 @@ extern atomic_t g_mem_counter_ngx_palloc_c;
 void dynload_exit()
 {
     int mem_alloc_counter;
-    printk("Exiting now.\r\n");
-//    return;
 
     hot_cache_destroy();
 
     mem_alloc_counter = atomic_read(&g_memory_alloc_counter);
-    printk("Memory check: allocate total counter %d.\r\n", mem_alloc_counter);
-
-    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_shmem_c);
-    printk("Memory check: ngx_shm_alloc and ngx_shm_free counter %d.\r\n", mem_alloc_counter);
-
-    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_alloc_c);
-    printk("Memory check: ngx_alloc and ngx_free counter %d.\r\n", mem_alloc_counter);
-
-    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_resolver_c);
-    printk("Memory check: ngx_resolver_alloc and ngx_resolver_free counter %d.\r\n", mem_alloc_counter);
+    rgos_dbg("MEMCHK: total counter %d.", mem_alloc_counter);
 
     mem_alloc_counter = atomic_read(&g_mem_counter_ngx_palloc_c);
-    printk("Memory check: ngx_create_pool and ngx_destroy_pool counter %d.\r\n", mem_alloc_counter);
+    rgos_dbg("        Nginx pool %d.", mem_alloc_counter);
+
+    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_alloc_c);
+    rgos_dbg("        Nginx normal memory %4d.", mem_alloc_counter);
+
+    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_shmem_c);
+    rgos_dbg("        Nginx shared memory %4d.", mem_alloc_counter);
+
+    mem_alloc_counter = atomic_read(&g_mem_counter_ngx_resolver_c);
+    rgos_dbg("        Nginx resolver mem  %4d.", mem_alloc_counter);
+
+    rgos_dbg("MEMCHK: ------------------------");
 }
 
 static char *getenv(const char *envvar)
@@ -1008,7 +1008,7 @@ ngx_process_options(ngx_cycle_t *cycle)
         cycle->prefix.data = p;
 
     } else {
-        printk("ERROR: %s<%d>: must set ngx_prefix.\r\n", __func__, __LINE__);
+        rgos_err("Must set ngx_prefix.");
         return NGX_ERROR;
 #if 0
 #ifndef NGX_PREFIX

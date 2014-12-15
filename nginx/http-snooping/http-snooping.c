@@ -2881,12 +2881,12 @@ void ngx_http_url_write(http_snooping_url_t *url_node)
     close(fd);
 
     if (url_node->encoding_type == HTTP_ECODING_TYPE_GZIP) {
-        printk("Uncompress File %s Start\r\n", url_node->local_file_buf);
+        rgos_dbg("Uncompress File %s Start\r\n", url_node->local_file_buf);
         file_uncompress(url_node->local_file_buf);
         url_node->local_file_buf[url_node->local_file_name.len + url_node->local_file_path.len] = '\0';
     }
     url_node->url_flags |= HTTP_SNOOPING_FLG_RES_WRITE;
-    printk("Save URL %s to Local File %s (File length %d) OK\r\n",
+    rgos_dbg("Save URL %s to Local File %s (File length %d) OK\r\n",
             url_node->url_buf, url_node->local_file_buf, url_node->url_res_len);
 #endif
 
@@ -3158,7 +3158,7 @@ void ngx_http_snooping_write_task(ulong argc, void *argv)
     ngx_http_snooping_load_url();
     while (1) {
         if (g_ngx_sp_write_task_exiting) {
-            printk("%s<%d>: g_ngx_sp_write_task exiting...\r\n", __func__, __LINE__);
+            rgos_dbg("Snooping write task is exiting...");
             break;
         }
         sleep(HZ * 2);
@@ -3258,7 +3258,7 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
     sc_ad.sin_family = AF_INET;
     ngx_c2sp_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (ngx_c2sp_socket == -1) {
-        printk("ERROR: %s<%d>: create ngx_c2sp_socket failed.\r\n", __func__, __LINE__);
+        rgos_err("Create ngx_c2sp_socket failed.");
         goto err_out0;
     }
 
@@ -3268,13 +3268,13 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
     setsockopt(ngx_c2sp_socket, SOL_SOCKET, SO_RCVBUF,(char *)&i,sizeof(i));*/
     sc_ad.sin_port = htons(HTTP_C2SP_PORT);
     if (bind(ngx_c2sp_socket, (struct sockaddr *)&sc_ad, sizeof(struct sockaddr)) == -1) {
-        printk("ERROR: %s<%d>: bind ngx_c2sp_socket failed.\r\n", __func__, __LINE__);
+        rgos_err("Bind ngx_c2sp_socket failed.");
         goto err_out1;
     }
 
     ngx_sp2c_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (ngx_sp2c_socket == -1) {
-        printk("ERROR: %s<%d>: create ngx_sp2c_socket failed.\r\n", __func__, __LINE__);
+        rgos_err("Create ngx_sp2c_socket failed.");
         goto err_out1;
     }
 
@@ -3284,14 +3284,14 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
     setsockopt(ngx_sp2c_socket, SOL_SOCKET, SO_RCVBUF,(char *)&i, sizeof(i));*/
     sc_ad.sin_port = htons(HTTP_SP2C_PORT);
     if (bind(ngx_sp2c_socket, (struct sockaddr *)&sc_ad, sizeof(struct sockaddr)) == -1) {
-        printk("ERROR: %s<%d>: bind ngx_sp2c_socket failed.\r\n", __func__, __LINE__);
+        rgos_err("Bind ngx_sp2c_socket failed.");
         goto err_out2;
     }
 
     fd = MAX(ngx_sp2c_socket, ngx_c2sp_socket);
     while (1) {
         if (g_ngx_sp_rxtx_task_exiting) {
-            printk("%s<%d>: exiting...\r\n", __func__, __LINE__);
+            rgos_dbg("Snooping rxtx task is exiting...");
             break;
         }
         time_out.tv_sec = 1;    /* ZHAOYAO XXX: 为了监听exit，降低timeout时间，从10s变为1s */
@@ -3317,11 +3317,11 @@ void ngx_http_snooping_rxtx_task(ulong argc, void *argv)
     }
 
 err_out2:
-    printk("%s<%d>: close ngx_sp2c_socket ...\r\n", __func__, __LINE__);
+    rgos_dbg("Close ngx_sp2c_socket ...");
     close(ngx_sp2c_socket);
 
 err_out1:
-    printk("%s<%d>: close ngx_c2sp_socket ...\r\n", __func__, __LINE__);
+    rgos_dbg("Close ngx_c2sp_socket ...");
     close(ngx_c2sp_socket);
 
 err_out0:
@@ -3465,7 +3465,7 @@ void ngx_http_snooping_init(ngx_log_t *log)
     //cli_add_command(PARSE_ADD_CFG_TOP_CMD, &TNAME(cfg_snoop_client_append_point),
     //                    "http snooping client");
 end_label:
-    printk("%s-%d err_step = %d\r\n", __FILE__, __LINE__, err_step);
+    rgos_dbg("err_step = %d.", err_step);
     return;
 }
 
@@ -3481,7 +3481,7 @@ void ngx_http_snooping_uninit()
     if (g_ngx_sp_rxtx_task != NULL) {
         g_ngx_sp_rxtx_task_exiting = 1;
         sleep(2 * HZ);
-        printk_rt("%s<%d>: deleting g_ngx_sp_rxtx_task.\r\n", __func__, __LINE__);
+        rgos_dbg("Deleting g_ngx_sp_rxtx_task...");
         delete_task(g_ngx_sp_rxtx_task);
         g_ngx_sp_rxtx_task = NULL;
         g_ngx_sp_rxtx_task_exiting = 0;
@@ -3491,7 +3491,7 @@ void ngx_http_snooping_uninit()
     if (g_ngx_sp_write_task != NULL) {
         g_ngx_sp_write_task_exiting = 1;
         sleep(3 * HZ);
-        printk_rt("%s<%d>: deleting g_ngx_sp_write_task.\r\n", __func__, __LINE__);
+        rgos_dbg("Deleting g_ngx_sp_write_task...");
         delete_task(g_ngx_sp_write_task);
         g_ngx_sp_write_task = NULL;
         g_ngx_sp_write_task_exiting = 0;

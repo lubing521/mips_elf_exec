@@ -39,7 +39,7 @@ ngx_init_setproctitle(ngx_log_t *log)
     ngx_uint_t   i;
 
     /* ZHAOYAO FIXME: return directly */
-    printk("%s<%d>: return directly.\r\n", __func__, __LINE__);
+    rgos_dbg("Return directly.");
     return NGX_OK;
 
     size = 0;

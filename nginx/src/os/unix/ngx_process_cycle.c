@@ -323,7 +323,7 @@ ngx_single_process_cycle(ngx_cycle_t *cycle)
             if (ngx_modules[i]->init_process(cycle) == NGX_ERROR) {
                 /* fatal */
                 /* ZHAOYAO FIXME TODO XXX: 之前成功init_process的module，申请的资源如何释放??? */
-                printk("%s-%d module %d\r\n", __FILE__, __LINE__, i);
+                rgos_err("init_process failed. module %d.", i);
                 return ;
             }
         }
@@ -343,7 +343,7 @@ ngx_single_process_cycle(ngx_cycle_t *cycle)
             }
 
             ngx_master_process_exit(cycle);
-            printk("%s-%d: exiting...\r\n", __FILE__, __LINE__);
+            rgos_dbg("Nginx single process cycle is exiting...");
             break;
         }
     }
@@ -746,7 +746,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     ngx_process = NGX_PROCESS_WORKER;
 
     ngx_worker_process_init(cycle, worker);
-    printk("%s-%d \r\n", __FILE__, __LINE__);
+    rgos_dbg();
     sleep(3*HZ);
     /*ngx_setproctitle("worker process");tangyoucan*/
 
@@ -825,7 +825,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
         }
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "worker cycle");
-        printk("%s-%d \r\n", __FILE__, __LINE__);
+        rgos_dbg();
         sleep(3*HZ);
         ngx_process_events_and_timers(cycle);
 

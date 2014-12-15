@@ -57,7 +57,7 @@ ngx_os_init(ngx_log_t *log)
         ngx_ncpu = sysconf(_SC_NPROCESSORS_ONLN);
     }
 #endif
-    printk("%s-%d ngx_ncpu = %d\r\n", __FILE__, __LINE__, ngx_ncpu);
+    rgos_dbg("ngx_ncpu = %d.", ngx_ncpu);
     if (ngx_ncpu < 1) {
         ngx_ncpu = 1;
     }

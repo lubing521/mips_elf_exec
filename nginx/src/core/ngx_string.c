@@ -235,7 +235,7 @@ ngx_vslprintf(u_char *buf, u_char *last, const char *fmt, va_list args)
                 
                 len = ngx_min(((size_t) (last - buf)), v->len);
                 if (len < 0) {
-                    printk_rt("last:%p, buf:%p, v->data:%p, v->len:%d, len:%d\n",
+                    rgos_err("last:%p, buf:%p, v->data:%p, v->len:%d, len:%d",
                         last, buf, v->data,  v->len, len);
                     TRACE_SF();
                 }

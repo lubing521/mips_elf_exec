@@ -265,7 +265,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 #endif
     if (ngx_conf_param(&conf) != NGX_CONF_OK) {
         environ = senv;
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Configure parametes failed.");
         ngx_destroy_cycle_pools(&conf);
         return NULL;
     }
@@ -273,7 +273,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {
         environ = senv;
         ngx_destroy_cycle_pools(&conf);
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Parse configuration failed.");
         return NULL;
     }
 
@@ -297,14 +297,14 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             {
                 environ = senv;
                 ngx_destroy_cycle_pools(&conf);
-                printk("%s-%d module i = %d\r\n", __FILE__, __LINE__, i);
+                rgos_err("Initialize module configuration failed, module index %d", i);
                 return NULL;
             }
         }
     }
 
     if (ngx_process == NGX_PROCESS_SIGNALLER) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_dbg("Here destroy temp_pool.");
         /* ZHAOYAO XXX: 此处释放不用的pool，避免内存泄露 */
         ngx_destroy_pool(conf.temp_pool);
         return cycle;
@@ -315,7 +315,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     if (ngx_test_config) {
 
         if (ngx_create_pidfile(&ccf->pid, log) != NGX_OK) {
-            printk("%s-%d\r\n", __FILE__, __LINE__);
+            rgos_err("Create pid file failed.");
             goto failed;
         }
 
@@ -334,7 +334,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             /* new pid file name */
 
             if (ngx_create_pidfile(&ccf->pid, log) != NGX_OK) {
-                printk("%s-%d\r\n", __FILE__, __LINE__);
+                rgos_err("Create pid file failed.");
                 goto failed;
             }
 
@@ -344,19 +344,19 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
 
     if (ngx_test_lockfile(cycle->lock_file.data, log) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Test lockfile failed.");
         goto failed;
     }
 
 
     if (ngx_create_paths(cycle, ccf->user) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Create paths failed.");
         goto failed;
     }
 
 
     if (ngx_log_open_default(cycle) != NGX_OK) {
-        printk("%s-%d\r\n", __FILE__, __LINE__);
+        rgos_err("Open default log failed.");
         goto failed;
     }
 
@@ -394,7 +394,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
                           ngx_open_file_n " \"%s\" failed",
                           file[i].name.data);
-            printk("%s-%d i = %d, %s\r\n", __FILE__, __LINE__, i, file[i].name.data);
+            rgos_err("Open file failed. i = %d, %s.", i, file[i].name.data);
             goto failed;
         }
 
@@ -430,10 +430,14 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         }
 
         if (shm_zone[i].shm.size == 0) {
+            u_char tempc;
             ngx_log_error(NGX_LOG_EMERG, log, 0,
                           "zero size shared memory zone \"%V\"",
                           &shm_zone[i].shm.name);
-            printk("%s-%d i = %d\r\n", __FILE__, __LINE__, i);
+            tempc = shm_zone[i].shm.name.data[shm_zone[i].shm.name.len];
+            shm_zone[i].shm.name.data[shm_zone[i].shm.name.len] = '\0';
+            rgos_err("zero size shared memory zone %s.", shm_zone[i].shm.name.data);
+            shm_zone[i].shm.name.data[shm_zone[i].shm.name.len] = tempc;
             goto failed;
         }
 
@@ -473,7 +477,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
                 if (shm_zone[i].init(&shm_zone[i], oshm_zone[n].data)
                     != NGX_OK)
                 {
-                    printk("%s-%d i = %d\r\n", __FILE__, __LINE__, i);
+                    rgos_err("Initialize shm_zone[%d] failed.", i);
                     goto failed;
                 }
 
@@ -486,17 +490,17 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         }
 
         if (ngx_shm_alloc(&shm_zone[i].shm) != NGX_OK) {
-                    printk("%s-%d i = %d\r\n", __FILE__, __LINE__, i);
+            rgos_err("Allocate shared memory failed.");
             goto failed;
         }
 
         if (ngx_init_zone_pool(cycle, &shm_zone[i]) != NGX_OK) {
-                    printk("%s-%d i = %d\r\n", __FILE__, __LINE__, i);
+            rgos_err("Initialize zone_pool failed.");
             goto failed;
         }
 
         if (shm_zone[i].init(&shm_zone[i], NULL) != NGX_OK) {
-                    printk("%s-%d i = %d\r\n", __FILE__, __LINE__, i);
+            rgos_err("Failed.");
             goto failed;
         }
 
@@ -606,12 +610,11 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     }
 
     if (ngx_open_listening_sockets(cycle) != NGX_OK) {
-        printk("%s-%d \r\n", __FILE__, __LINE__);
+        rgos_err("Failed.");
         goto failed;
     }
 
     if (!ngx_test_config) {
-        printk("%s-%d \r\n", __FILE__, __LINE__);
         ngx_configure_listening_sockets(cycle);
     }
 
@@ -630,7 +633,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
                 /* fatal */
                 //exit(1);
                 /* ZHAOYAO FIXME XXX TODO: 如何处理接下来的困局??? */
-                printk("FATAL error: %s<%d>: init_module %u failed.\r\n", __func__, __LINE__, i);
+                rgos_err("FATAL error: init_module %u failed.", i);
                 goto failed;
             }
         }
@@ -782,7 +785,7 @@ old_shm_zone_done:
                           "could not create ngx_temp_pool");
             //exit(1);
             /* ZHAOYAO FIXME XXX TODO: 如何解决困局??? */
-            printk("FATAL error: %s<%d>: create ngx_temp_pool failed.\r\n", __func__, __LINE__);
+            rgos_err("FATAL error: create ngx_temp_pool failed.");
             ngx_uninit_cycle(&cycle);
             return NULL;
         }
@@ -794,7 +797,7 @@ old_shm_zone_done:
         if (ngx_old_cycles.elts == NULL) {
             //exit(1);
             /* ZHAOYAO FIXME XXX TODO: 如何解决困局??? */
-            printk("FATAL error: %s<%d>: create ngx_old_cycles.elts failed.\r\n", __func__, __LINE__);
+            rgos_err("FATAL error: create ngx_old_cycles.elts failed.");
             ngx_uninit_cycle(&cycle);
             return NULL;
         }
@@ -815,7 +818,7 @@ old_shm_zone_done:
     if (old == NULL) {
         //exit(1);
         /* ZHAOYAO FIXME XXX TODO: 如何解决困局??? */
-        printk("FATAL error: %s<%d>: ngx_array_push ngx_old_cycles failed.\r\n", __func__, __LINE__);
+        rgos_err("FATAL error: ngx_array_push ngx_old_cycles failed.");
         ngx_uninit_cycle(&cycle);
         return NULL;
     }
@@ -868,7 +871,7 @@ failed:
 
     if (ngx_test_config) {
         ngx_destroy_cycle_pools(&conf);
-        printk("%s-%d \r\n", __FILE__, __LINE__);
+        rgos_err("Failed.");
         return NULL;
     }
 
@@ -938,7 +941,7 @@ void ngx_uninit_cycle(ngx_cycle_t *cycle)
         if (ngx_close_file(file[i].fd) == NGX_FILE_ERROR) {
             uc = file->name.data[file->name.len];
             file->name.data[file->name.len] = '\0';
-            printk("%s<%d>: close file %s failed.\r\n", __func__, __LINE__, file->name.data);
+            rgos_err("Close file %s failed.", file->name.data);
             file->name.data[file->name.len] = uc;
         }
     }
@@ -952,7 +955,7 @@ void ngx_uninit_cycle(ngx_cycle_t *cycle)
         if (ngx_close_socket(ls[i].fd) == -1) {
             uc = ls[i].addr_text.data[ls[i].addr_text.len];
             ls[i].addr_text.data[ls[i].addr_text.len] = '\0';
-            printk("%s<%d>: close listening address %s failed.\r\n", __func__, __LINE__, ls[i].addr_text.data);
+            rgos_err("Close listening address %s failed.", ls[i].addr_text.data);
             ls[i].addr_text.data[ls[i].addr_text.len] = uc;
         }
     }
