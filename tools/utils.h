@@ -1,6 +1,9 @@
 #include <stdint.h>
 
+#if defined(__CYGWIN__)
+#else
 typedef uint32_t addr_t; /* 目标设备的地址指针类型 */
+#endif
 
 #define BUG(fmt, arg...) \
     do { \
