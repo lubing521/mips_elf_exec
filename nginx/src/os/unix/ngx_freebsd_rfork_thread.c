@@ -317,6 +317,7 @@ ngx_mutex_init(ngx_log_t *log, ngx_uint_t flags)
     union semun   op;
 
     m = ngx_alloc(sizeof(ngx_mutex_t), log);
+    ngx_dbg_mem_alloc(m);
     if (m == NULL) {
         return NULL;
     }
@@ -593,6 +594,7 @@ ngx_cond_init(ngx_log_t *log)
     ngx_cond_t  *cv;
 
     cv = ngx_alloc(sizeof(ngx_cond_t), log);
+    ngx_dbg_mem_alloc(cv);
     if (cv == NULL) {
         return NULL;
     }

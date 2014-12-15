@@ -233,6 +233,7 @@ ngx_palloc_large(ngx_pool_t *pool, size_t size)
     ngx_pool_large_t  *large;
 
     p = ngx_alloc(size, pool->log);
+    ngx_dbg_mem_alloc(p);
     if (p == NULL) {
         return NULL;
     }

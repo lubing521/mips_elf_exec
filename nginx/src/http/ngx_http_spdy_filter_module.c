@@ -295,6 +295,7 @@ ngx_http_spdy_header_filter(ngx_http_request_t *r)
     }
 
     buf = ngx_alloc(len, r->pool->log);
+    ngx_dbg_mem_alloc(buf);
     if (buf == NULL) {
         return NGX_ERROR;
     }

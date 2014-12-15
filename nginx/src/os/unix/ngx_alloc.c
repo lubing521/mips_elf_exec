@@ -41,6 +41,7 @@ ngx_calloc(size_t size, ngx_log_t *log)
     void  *p;
 
     p = ngx_alloc(size, log);
+    ngx_dbg_mem_alloc(p);
 
     if (p) {
         ngx_memzero(p, size);
@@ -53,6 +54,7 @@ void
 ngx_free(void *ptr)
 {
     if (ptr != NULL) {
+        ngx_dbg_mem_free(ptr);
         atomic_dec(&g_mem_counter_ngx_alloc_c);
         rgos_free(ptr);
     }
@@ -84,6 +86,7 @@ ngx_memalign(size_t alignment, size_t size, ngx_log_t *log)
 */
 
     p = ngx_alloc(size, log);
+    ngx_dbg_mem_alloc(p);
     return p;
 }
 

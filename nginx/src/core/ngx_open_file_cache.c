@@ -364,12 +364,14 @@ create:
     }
 
     file = ngx_alloc(sizeof(ngx_cached_open_file_t), pool->log);
+    ngx_dbg_mem_alloc(file);
 
     if (file == NULL) {
         goto failed;
     }
 
     file->name = ngx_alloc(name->len + 1, pool->log);
+    ngx_dbg_mem_alloc(file->name);
 
     if (file->name == NULL) {
         ngx_free(file);
@@ -973,6 +975,7 @@ ngx_open_file_add_event(ngx_open_file_cache_t *cache,
     }
 
     fev = ngx_alloc(sizeof(ngx_open_file_cache_event_t), log);
+    ngx_dbg_mem_alloc(fev);
     if (fev == NULL) {
         ngx_free(file->event);
         file->event = NULL;

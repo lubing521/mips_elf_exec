@@ -722,6 +722,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 */
     cycle->connections =
         ngx_alloc(sizeof(ngx_connection_t) * cycle->connection_n, cycle->log);
+    ngx_dbg_mem_alloc(cycle->connections);
     if (cycle->connections == NULL) {
         return NGX_ERROR;
     }
@@ -730,6 +731,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 
     cycle->read_events = ngx_alloc(sizeof(ngx_event_t) * cycle->connection_n,
                                    cycle->log);
+    ngx_dbg_mem_alloc(cycle->read_events);
     if (cycle->read_events == NULL) {
         return NGX_ERROR;
     }
@@ -746,6 +748,7 @@ ngx_event_process_init(ngx_cycle_t *cycle)
 
     cycle->write_events = ngx_alloc(sizeof(ngx_event_t) * cycle->connection_n,
                                     cycle->log);
+    ngx_dbg_mem_alloc(cycle->write_events);
     if (cycle->write_events == NULL) {
         return NGX_ERROR;
     }

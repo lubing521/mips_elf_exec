@@ -148,6 +148,7 @@ ngx_devpoll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
         change_list = ngx_alloc(sizeof(struct pollfd) * dpcf->changes,
                                 cycle->log);
+        ngx_dbg_mem_alloc(change_list);
         if (change_list == NULL) {
             return NGX_ERROR;
         }
@@ -158,6 +159,7 @@ ngx_devpoll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
         change_index = ngx_alloc(sizeof(ngx_event_t *) * dpcf->changes,
                                  cycle->log);
+        ngx_dbg_mem_alloc(change_index);
         if (change_index == NULL) {
             return NGX_ERROR;
         }
@@ -172,6 +174,7 @@ ngx_devpoll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
         event_list = ngx_alloc(sizeof(struct pollfd) * dpcf->events,
                                cycle->log);
+        ngx_dbg_mem_alloc(event_list);
         if (event_list == NULL) {
             return NGX_ERROR;
         }

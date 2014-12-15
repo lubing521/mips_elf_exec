@@ -269,6 +269,7 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
     }
 
     test = ngx_alloc(hinit->max_size * sizeof(u_short), hinit->pool->log);
+    ngx_dbg_mem_alloc(test);
     if (test == NULL) {
         return NGX_ERROR;
     }

@@ -97,6 +97,7 @@ ngx_google_perftools_worker(ngx_cycle_t *cycle)
     }
 
     profile = ngx_alloc(gptcf->profiles.len + NGX_INT_T_LEN + 2, cycle->log);
+    ngx_dbg_mem_alloc(profile);
     if (profile == NULL) {
         return NGX_OK;
     }

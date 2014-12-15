@@ -1849,6 +1849,7 @@ ngx_sort(void *base, size_t n, size_t size,
     u_char  *p1, *p2, *p;
 
     p = ngx_alloc(size, ngx_cycle->log);
+    ngx_dbg_mem_alloc(p);
     if (p == NULL) {
         return;
     }

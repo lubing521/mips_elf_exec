@@ -2844,6 +2844,7 @@ ngx_resolver_alloc(ngx_resolver_t *r, size_t size)
     /* lock alloc mutex */
 
     p = ngx_alloc(size, r->log);
+    ngx_dbg_mem_alloc(p);
     if (p != NULL) {
         atomic_inc(&g_mem_counter_ngx_resolver_c);
     }

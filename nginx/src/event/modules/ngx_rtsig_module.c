@@ -179,6 +179,7 @@ ngx_rtsig_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
     overflow_list = ngx_alloc(sizeof(struct pollfd) * rtscf->overflow_events,
                               cycle->log);
+    ngx_dbg_mem_alloc(overflow_list);
     if (overflow_list == NULL) {
         return NGX_ERROR;
     }

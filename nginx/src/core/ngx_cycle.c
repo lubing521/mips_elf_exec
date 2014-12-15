@@ -974,6 +974,9 @@ void ngx_uninit_cycle(ngx_cycle_t *cycle)
         }
     }
 
+    /* ZHAOYAO XXX: 释放event模块的资源 */
+    ngx_done_events(cycle);
+
     rgos_dbg("destroy pool 0x%p", cycle->pool);
     ngx_destroy_pool(cycle->pool);
 

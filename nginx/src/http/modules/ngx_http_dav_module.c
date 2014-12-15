@@ -846,6 +846,7 @@ ngx_http_dav_copy_dir(ngx_tree_ctx_t *ctx, ngx_str_t *path)
     len = copy->path.len + path->len;
 
     dir = ngx_alloc(len + 1, ctx->log);
+    ngx_dbg_mem_alloc(dir);
     if (dir == NULL) {
         return NGX_ABORT;
     }
@@ -882,6 +883,7 @@ ngx_http_dav_copy_dir_time(ngx_tree_ctx_t *ctx, ngx_str_t *path)
     len = copy->path.len + path->len;
 
     dir = ngx_alloc(len + 1, ctx->log);
+    ngx_dbg_mem_alloc(dir);
     if (dir == NULL) {
         return NGX_ABORT;
     }
@@ -947,6 +949,7 @@ ngx_http_dav_copy_tree_file(ngx_tree_ctx_t *ctx, ngx_str_t *path)
     len = copy->path.len + path->len;
 
     file = ngx_alloc(len + 1, ctx->log);
+    ngx_dbg_mem_alloc(file);
     if (file == NULL) {
         return NGX_ABORT;
     }

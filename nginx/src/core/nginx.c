@@ -672,6 +672,7 @@ tz_found:
 
     if (last) {
         env = ngx_alloc((*last + n + 1) * sizeof(char *), cycle->log);
+        ngx_dbg_mem_alloc(env);
         *last = n;
 
     } else {
@@ -739,6 +740,7 @@ ngx_exec_new_binary(ngx_cycle_t *cycle, char *const *argv)
     var = ngx_alloc(sizeof(NGINX_VAR)
                     + cycle->listening.nelts * (NGX_INT32_LEN + 1) + 2,
                     cycle->log);
+    ngx_dbg_mem_alloc(var);
     if (var == NULL) {
         ngx_free(env);
         return NGX_INVALID_PID;
@@ -954,6 +956,7 @@ ngx_save_argv(ngx_cycle_t *cycle, int argc, char *const *argv)
     ngx_argc = argc;
 
     ngx_argv = ngx_alloc((argc + 1) * sizeof(char *), cycle->log);
+    ngx_dbg_mem_alloc(ngx_argv);
     if (ngx_argv == NULL) {
         return NGX_ERROR;
     }
@@ -962,6 +965,7 @@ ngx_save_argv(ngx_cycle_t *cycle, int argc, char *const *argv)
         len = ngx_strlen(argv[i]) + 1;
 
         ngx_argv[i] = ngx_alloc(len, cycle->log);
+        ngx_dbg_mem_alloc(ngx_argv[i]);
         if (ngx_argv[i] == NULL) {
             return NGX_ERROR;
         }

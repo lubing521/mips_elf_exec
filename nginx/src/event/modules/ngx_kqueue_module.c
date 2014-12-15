@@ -169,6 +169,7 @@ ngx_kqueue_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
         change_list0 = ngx_alloc(kcf->changes * sizeof(struct kevent),
                                  cycle->log);
+        ngx_dbg_mem_alloc(change_list0);
         if (change_list0 == NULL) {
             return NGX_ERROR;
         }
@@ -179,6 +180,7 @@ ngx_kqueue_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
         change_list1 = ngx_alloc(kcf->changes * sizeof(struct kevent),
                                  cycle->log);
+        ngx_dbg_mem_alloc(change_list1);
         if (change_list1 == NULL) {
             return NGX_ERROR;
         }
@@ -194,6 +196,7 @@ ngx_kqueue_init(ngx_cycle_t *cycle, ngx_msec_t timer)
         }
 
         event_list = ngx_alloc(kcf->events * sizeof(struct kevent), cycle->log);
+        ngx_dbg_mem_alloc(event_list);
         if (event_list == NULL) {
             return NGX_ERROR;
         }

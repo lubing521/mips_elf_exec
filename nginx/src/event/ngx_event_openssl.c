@@ -2512,6 +2512,7 @@ ngx_ssl_get_session_id(ngx_connection_t *c, ngx_pool_t *pool, ngx_str_t *s)
     len = i2d_SSL_SESSION(sess, NULL);
 
     buf = ngx_alloc(len, c->log);
+    ngx_dbg_mem_alloc(buf);
     if (buf == NULL) {
         return NGX_ERROR;
     }

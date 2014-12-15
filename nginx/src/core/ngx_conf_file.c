@@ -141,6 +141,7 @@ ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename)
         cf->conf_file->buffer = &buf;
 
         buf.start = ngx_alloc(NGX_CONF_BUFFER, cf->log);
+        ngx_dbg_mem_alloc(buf.start);
         if (buf.start == NULL) {
             goto failed;
         }

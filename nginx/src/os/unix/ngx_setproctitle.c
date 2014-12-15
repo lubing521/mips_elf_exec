@@ -49,6 +49,7 @@ ngx_init_setproctitle(ngx_log_t *log)
     }
 
     p = ngx_alloc(size, log);
+    ngx_dbg_mem_alloc(p);
     if (p == NULL) {
         return NGX_ERROR;
     }

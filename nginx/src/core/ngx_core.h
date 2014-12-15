@@ -8,6 +8,30 @@
 #ifndef _NGX_CORE_H_INCLUDED_
 #define _NGX_CORE_H_INCLUDED_
 
+#include <rgos_std.h>
+
+#define ngx_dbg_pool_create(addr) \
+    do { \
+        rgos_dbg("NGX POOL + <0x%p>", (addr)); \
+    } while (0)
+        
+#define ngx_dbg_pool_destroy(addr) \
+    do { \
+        rgos_dbg("NGX POOL - <0x%p>", (addr)); \
+    } while (0)
+
+#define ngx_dbg_mem_alloc(addr) \
+    do { \
+        rgos_dbg("NGX MEM + <0x%p>", (addr)); \
+    } while (0)
+        
+#define ngx_dbg_mem_free(addr) \
+    do { \
+        rgos_dbg("NGX MEM - <0x%p>", (addr)); \
+    } while (0)
+
+
+
 
 typedef struct ngx_module_s      ngx_module_t;
 typedef struct ngx_conf_s        ngx_conf_t;

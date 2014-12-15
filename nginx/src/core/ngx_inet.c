@@ -954,6 +954,7 @@ ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
     port = htons(u->port);
 
     host = ngx_alloc(u->host.len + 1, pool->log);
+    ngx_dbg_mem_alloc(host);
     if (host == NULL) {
         return NGX_ERROR;
     }
@@ -1106,6 +1107,7 @@ ngx_inet_resolve_host(ngx_pool_t *pool, ngx_url_t *u)
     if (in_addr == INADDR_NONE) {
 #if 0
         host = ngx_alloc(u->host.len + 1, pool->log);
+        ngx_dbg_mem_alloc(host);
         if (host == NULL) {
             return NGX_ERROR;
         }

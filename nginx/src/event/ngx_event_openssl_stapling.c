@@ -224,6 +224,7 @@ ngx_ssl_stapling_file(ngx_conf_t *cf, ngx_ssl_t *ssl, ngx_str_t *file)
     }
 
     buf = ngx_alloc(len, ssl->log);
+    ngx_dbg_mem_alloc(buf);
     if (buf == NULL) {
         goto failed;
     }
@@ -636,6 +637,7 @@ ngx_ssl_stapling_ocsp_handler(ngx_ssl_ocsp_ctx_t *ctx)
 
     response.len = len;
     response.data = ngx_alloc(response.len, ctx->log);
+    ngx_dbg_mem_alloc(response.data);
 
     if (response.data == NULL) {
         goto done;

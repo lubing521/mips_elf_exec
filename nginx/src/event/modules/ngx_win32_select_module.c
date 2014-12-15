@@ -89,6 +89,7 @@ ngx_select_init(ngx_cycle_t *cycle, ngx_msec_t timer)
     {
         index = ngx_alloc(sizeof(ngx_event_t *) * 2 * cycle->connection_n,
                           cycle->log);
+        ngx_dbg_mem_alloc(index);
         if (index == NULL) {
             return NGX_ERROR;
         }

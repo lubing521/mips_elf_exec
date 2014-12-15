@@ -79,6 +79,7 @@ ngx_poll_init(ngx_cycle_t *cycle, ngx_msec_t timer)
     {
         list = ngx_alloc(sizeof(struct pollfd) * cycle->connection_n,
                          cycle->log);
+        ngx_dbg_mem_alloc(list);
         if (list == NULL) {
             return NGX_ERROR;
         }

@@ -1238,6 +1238,7 @@ ngx_http_file_cache_forced_expire(ngx_http_file_cache_t *cache)
     len = path->name.len + 1 + path->len + 2 * NGX_HTTP_CACHE_KEY_LEN;
 
     name = ngx_alloc(len + 1, ngx_cycle->log);
+    ngx_dbg_mem_alloc(name);
     if (name == NULL) {
         return 10;
     }
@@ -1301,6 +1302,7 @@ ngx_http_file_cache_expire(ngx_http_file_cache_t *cache)
     len = path->name.len + 1 + path->len + 2 * NGX_HTTP_CACHE_KEY_LEN;
 
     name = ngx_alloc(len + 1, ngx_cycle->log);
+    ngx_dbg_mem_alloc(name);
     if (name == NULL) {
         return 10;
     }

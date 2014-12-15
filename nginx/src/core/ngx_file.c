@@ -707,6 +707,7 @@ ngx_ext_rename_file(ngx_str_t *src, ngx_str_t *to, ngx_ext_rename_file_t *ext)
         cf.log = ext->log;
 
         name = ngx_alloc(to->len + 1 + 10 + 1, ext->log);
+        ngx_dbg_mem_alloc(name);
         if (name == NULL) {
             return NGX_ERROR;
         }
@@ -808,6 +809,7 @@ ngx_copy_file(u_char *from, u_char *to, ngx_copy_file_t *cf)
     }
 
     buf = ngx_alloc(len, cf->log);
+    ngx_dbg_mem_alloc(buf);
     if (buf == NULL) {
         goto failed;
     }
@@ -938,6 +940,7 @@ ngx_walk_tree(ngx_tree_ctx_t *ctx, ngx_str_t *tree)
 
     if (ctx->alloc) {
         data = ngx_alloc(ctx->alloc, ctx->log);
+        ngx_dbg_mem_alloc(data);
         if (data == NULL) {
             goto failed;
         }
@@ -996,6 +999,7 @@ ngx_walk_tree(ngx_tree_ctx_t *ctx, ngx_str_t *tree)
             buf.len = tree->len + 1 + len + NGX_DIR_MASK_LEN;
 
             buf.data = ngx_alloc(buf.len + 1, ctx->log);
+            ngx_dbg_mem_alloc(buf.data);
             if (buf.data == NULL) {
                 goto failed;
             }

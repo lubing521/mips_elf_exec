@@ -223,6 +223,7 @@ ngx_eventport_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
         event_list = ngx_alloc(sizeof(port_event_t) * epcf->events,
                                cycle->log);
+        ngx_dbg_mem_alloc(event_list);
         if (event_list == NULL) {
             return NGX_ERROR;
         }
