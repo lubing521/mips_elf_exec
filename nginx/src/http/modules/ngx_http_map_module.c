@@ -231,20 +231,20 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (pool == NULL) {
         return NGX_CONF_ERROR;
     }
-    rgos_dbg("create pool 0x%p", pool);
+    ngx_dbg_pool_create(pool);
 
     ctx.keys.pool = cf->pool;
     ctx.keys.temp_pool = pool;
 
     if (ngx_hash_keys_array_init(&ctx.keys, NGX_HASH_LARGE) != NGX_OK) {
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NGX_CONF_ERROR;
     }
 
     ctx.values_hash = ngx_pcalloc(pool, sizeof(ngx_array_t) * ctx.keys.hsize);
     if (ctx.values_hash == NULL) {
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NGX_CONF_ERROR;
     }
@@ -253,7 +253,7 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                        sizeof(ngx_http_variable_value_t))
         != NGX_OK)
     {
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NGX_CONF_ERROR;
     }
@@ -262,7 +262,7 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (ngx_array_init(&ctx.regexes, cf->pool, 2, sizeof(ngx_http_map_regex_t))
         != NGX_OK)
     {
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NGX_CONF_ERROR;
     }
@@ -283,7 +283,7 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     *cf = save;
 
     if (rv != NGX_CONF_OK) {
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return rv;
     }
@@ -306,7 +306,7 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         if (ngx_hash_init(&hash, ctx.keys.keys.elts, ctx.keys.keys.nelts)
             != NGX_OK)
         {
-            rgos_dbg("destroy pool 0x%p", pool);
+            ngx_dbg_pool_destroy(pool);
             ngx_destroy_pool(pool);
             return NGX_CONF_ERROR;
         }
@@ -325,7 +325,7 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                                    ctx.keys.dns_wc_head.nelts)
             != NGX_OK)
         {
-            rgos_dbg("destroy pool 0x%p", pool);
+            ngx_dbg_pool_destroy(pool);
             ngx_destroy_pool(pool);
             return NGX_CONF_ERROR;
         }
@@ -346,7 +346,7 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                                    ctx.keys.dns_wc_tail.nelts)
             != NGX_OK)
         {
-            rgos_dbg("destroy pool 0x%p", pool);
+            ngx_dbg_pool_destroy(pool);
             ngx_destroy_pool(pool);
             return NGX_CONF_ERROR;
         }
@@ -363,7 +363,7 @@ ngx_http_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 #endif
 
-    rgos_dbg("destroy pool 0x%p", pool);
+    ngx_dbg_pool_destroy(pool);
     ngx_destroy_pool(pool);
 
     return rv;

@@ -434,7 +434,7 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (pool == NULL) {
         return NGX_CONF_ERROR;
     }
-    rgos_dbg("create pool 0x%p", pool);
+    ngx_dbg_pool_create(pool);
 
     ngx_memzero(&ctx, sizeof(ngx_http_geo_conf_ctx_t));
 
@@ -442,7 +442,7 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (ctx.temp_pool == NULL) {
         return NGX_CONF_ERROR;
     }
-    rgos_dbg("create pool 0x%p", ctx.temp_pool);
+    ngx_dbg_pool_create(ctx.temp_pool);
 
     ngx_rbtree_init(&ctx.rbtree, &ctx.sentinel, ngx_str_rbtree_insert_value);
 
@@ -505,9 +505,9 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         var->get_handler = ngx_http_geo_range_variable;
         var->data = (uintptr_t) geo;
 
-        rgos_dbg("destroy pool 0x%p", ctx.temp_pool);
+        ngx_dbg_pool_destroy(ctx.temp_pool);
         ngx_destroy_pool(ctx.temp_pool);
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
 
     } else {
@@ -534,9 +534,9 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         var->get_handler = ngx_http_geo_cidr_variable;
         var->data = (uintptr_t) geo;
 
-        rgos_dbg("destroy pool 0x%p", ctx.temp_pool);
+        ngx_dbg_pool_destroy(ctx.temp_pool);
         ngx_destroy_pool(ctx.temp_pool);
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
 
         if (ngx_radix32tree_insert(ctx.tree, 0, 0,

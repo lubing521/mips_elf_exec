@@ -724,7 +724,7 @@ ngx_mail_close_connection(ngx_connection_t *c)
 
     ngx_close_connection(c);
 
-    rgos_dbg("destroy pool 0x%p", pool);
+    ngx_dbg_pool_destroy(pool);
     ngx_destroy_pool(pool);
 }
 

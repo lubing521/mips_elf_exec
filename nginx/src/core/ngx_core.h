@@ -4,33 +4,54 @@
  * Copyright (C) Nginx, Inc.
  */
 
-
 #ifndef _NGX_CORE_H_INCLUDED_
 #define _NGX_CORE_H_INCLUDED_
 
+
 #include <rgos_std.h>
 
+#define NGX_DEBUG_POOL_CREATE_AND_DESTROY   1
+#define NGX_DEBUG_NGX_ALLOC_AND_FREE        0
+
+#if NGX_DEBUG_POOL_CREATE_AND_DESTROY
 #define ngx_dbg_pool_create(addr) \
     do { \
-        rgos_dbg("NGX POOL + <0x%p>", (addr)); \
+        if ((addr) != NULL) { \
+            rgos_dbg("NGX POOL + <0x%p>", (addr)); \
+        } \
     } while (0)
+#else
+#define ngx_dbg_pool_create(addr) {}
+#endif
         
+#if NGX_DEBUG_POOL_CREATE_AND_DESTROY
 #define ngx_dbg_pool_destroy(addr) \
     do { \
         rgos_dbg("NGX POOL - <0x%p>", (addr)); \
     } while (0)
+#else
+#define ngx_dbg_pool_destroy(addr) {}
+#endif
 
+#if NGX_DEBUG_NGX_ALLOC_AND_FREE
 #define ngx_dbg_mem_alloc(addr) \
     do { \
-        rgos_dbg("NGX MEM + <0x%p>", (addr)); \
+        if ((addr) != NULL) { \
+            rgos_dbg("NGX MEM + <0x%p>", (addr)); \
+        } \
     } while (0)
-        
+#else
+#define ngx_dbg_mem_alloc(addr) {}
+#endif
+
+#if NGX_DEBUG_NGX_ALLOC_AND_FREE
 #define ngx_dbg_mem_free(addr) \
     do { \
         rgos_dbg("NGX MEM - <0x%p>", (addr)); \
     } while (0)
-
-
+#else
+#define ngx_dbg_mem_free(addr) {}
+#endif
 
 
 typedef struct ngx_module_s      ngx_module_t;

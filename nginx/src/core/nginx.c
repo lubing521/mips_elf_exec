@@ -318,7 +318,7 @@ ngx_main(ulong argc, void *argv)
         ret = 1;
         goto err_out5;
     }
-    rgos_dbg("create pool 0x%p", init_cycle.pool);
+    ngx_dbg_pool_create(init_cycle.pool);
 
     /*if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
         return 1;
@@ -456,7 +456,6 @@ err_out7:
 
 err_out6:
     /* ZHAOYAO XXX: 在ngx_init_cycle()后，init_cycle的pool已经被销毁，因此需要在ngx_destroy_pool增加检查 */
-    rgos_dbg("destroy pool 0x%p", init_cycle.pool);
     ngx_destroy_pool(init_cycle.pool);
 
 err_out5:

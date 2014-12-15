@@ -3354,7 +3354,7 @@ void ngx_http_snooping_init(ngx_log_t *log)
         err_step = 1;
         goto end_label;
     }
-    rgos_dbg("create pool 0x%p", g_http_snooping_ctx.http_sp_url_pool);
+    ngx_dbg_pool_create(g_http_snooping_ctx.http_sp_url_pool);
 
     for(i = 0; i < HTTP_MAX_HOST; i++) {
         http_homepage_hash[i] = 0;
@@ -3516,7 +3516,6 @@ void ngx_http_snooping_uninit()
     rgos_free(g_http_snooping_ctx.url_base);
 
     /* ZHAOYAO TODO: ÊÍ·Åg_http_snooping_ctx.http_sp_url_pool³Ø */
-    rgos_dbg("destroy pool 0x%p", g_http_snooping_ctx.http_sp_url_pool);
     ngx_destroy_pool(g_http_snooping_ctx.http_sp_url_pool);
 }
 

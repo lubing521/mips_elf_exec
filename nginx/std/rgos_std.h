@@ -5,12 +5,12 @@
 
 #define rgos_dbg(fmt, arg...) \
     do { \
-        printk("*DEBUG* %-32s[%04d]: " fmt "\r\n", __func__, __LINE__, ##arg); \
+        printk("*DEBUG* %-24.23s[%04d]: " fmt "\r\n", __func__, __LINE__, ##arg); \
     } while (0)
 
 #define rgos_err(fmt, arg...) \
     do { \
-        printk_rt("*ERROR* %-32s[%04d]: " fmt "\r\n", __func__, __LINE__, ##arg); \
+        printk_rt("*ERROR* %-24.23s[%04d]: " fmt "\r\n", __func__, __LINE__, ##arg); \
     } while (0)
 
 #endif /* __RGOS_STD_H__ */

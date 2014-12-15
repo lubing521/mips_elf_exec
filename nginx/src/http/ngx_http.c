@@ -1486,7 +1486,7 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
     if (ha.temp_pool == NULL) {
         return NGX_ERROR;
     }
-    rgos_dbg("create pool 0x%p", ha.temp_pool);
+    ngx_dbg_pool_create(ha.temp_pool);
 
     ha.pool = cf->pool;
 
@@ -1584,7 +1584,7 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
         addr->wc_tail = (ngx_hash_wildcard_t *) hash.hash;
     }
 
-    rgos_dbg("destroy pool 0x%p", ha.temp_pool);
+    ngx_dbg_pool_destroy(ha.temp_pool);
     ngx_destroy_pool(ha.temp_pool);
 
 #if (NGX_PCRE)
@@ -1618,7 +1618,7 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
 
 failed:
 
-    rgos_dbg("destroy pool 0x%p", ha.temp_pool);
+    ngx_dbg_pool_destroy(ha.temp_pool);
     ngx_destroy_pool(ha.temp_pool);
 
     return NGX_ERROR;

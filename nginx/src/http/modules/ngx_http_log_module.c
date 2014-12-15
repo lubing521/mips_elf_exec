@@ -550,7 +550,7 @@ ngx_http_log_gzip(ngx_fd_t fd, u_char *buf, size_t len, ngx_int_t level,
         /* simulate successful logging */
         return len;
     }
-    rgos_dbg("create pool 0x%p", pool);
+    ngx_dbg_pool_create(pool);
 
     pool->log = log;
 
@@ -609,7 +609,7 @@ ngx_http_log_gzip(ngx_fd_t fd, u_char *buf, size_t len, ngx_int_t level,
     if (n != (ssize_t) size) {
         err = (n == -1) ? ngx_errno : 0;
 
-        rgos_dbg("destroy pool 0x%p", pool);
+        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
 
         ngx_set_errno(err);
@@ -618,7 +618,7 @@ ngx_http_log_gzip(ngx_fd_t fd, u_char *buf, size_t len, ngx_int_t level,
 
 done:
 
-    rgos_dbg("destroy pool 0x%p", pool);
+    ngx_dbg_pool_destroy(pool);
     ngx_destroy_pool(pool);
 
     /* simulate successful logging */

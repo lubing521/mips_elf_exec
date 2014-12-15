@@ -53,8 +53,9 @@ ngx_calloc(size_t size, ngx_log_t *log)
 void
 ngx_free(void *ptr)
 {
+    ngx_dbg_mem_free(ptr);  /* ZHAOYAO XXX: 即使释放NULL, 这里也能给出debug信息 */
+
     if (ptr != NULL) {
-        ngx_dbg_mem_free(ptr);
         atomic_dec(&g_mem_counter_ngx_alloc_c);
         rgos_free(ptr);
     }

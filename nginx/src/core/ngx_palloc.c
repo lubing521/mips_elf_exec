@@ -54,6 +54,8 @@ ngx_destroy_pool(ngx_pool_t *pool)
     ngx_pool_large_t    *l;
     ngx_pool_cleanup_t  *c;
 
+    ngx_dbg_pool_destroy(pool); /* ZHAOYAO XXX: 释放NULL时，也给出debug信息 */
+
     if (pool == NULL) {
         return;
     }
