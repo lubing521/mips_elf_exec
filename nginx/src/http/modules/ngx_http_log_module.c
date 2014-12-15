@@ -609,7 +609,6 @@ ngx_http_log_gzip(ngx_fd_t fd, u_char *buf, size_t len, ngx_int_t level,
     if (n != (ssize_t) size) {
         err = (n == -1) ? ngx_errno : 0;
 
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
 
         ngx_set_errno(err);
@@ -618,7 +617,6 @@ ngx_http_log_gzip(ngx_fd_t fd, u_char *buf, size_t len, ngx_int_t level,
 
 done:
 
-    ngx_dbg_pool_destroy(pool);
     ngx_destroy_pool(pool);
 
     /* simulate successful logging */

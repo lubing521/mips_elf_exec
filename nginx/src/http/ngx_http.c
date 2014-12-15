@@ -1584,7 +1584,6 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
         addr->wc_tail = (ngx_hash_wildcard_t *) hash.hash;
     }
 
-    ngx_dbg_pool_destroy(ha.temp_pool);
     ngx_destroy_pool(ha.temp_pool);
 
 #if (NGX_PCRE)
@@ -1618,7 +1617,6 @@ ngx_http_server_names(ngx_conf_t *cf, ngx_http_core_main_conf_t *cmcf,
 
 failed:
 
-    ngx_dbg_pool_destroy(ha.temp_pool);
     ngx_destroy_pool(ha.temp_pool);
 
     return NGX_ERROR;

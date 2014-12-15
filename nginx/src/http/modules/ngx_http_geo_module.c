@@ -505,9 +505,7 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         var->get_handler = ngx_http_geo_range_variable;
         var->data = (uintptr_t) geo;
 
-        ngx_dbg_pool_destroy(ctx.temp_pool);
         ngx_destroy_pool(ctx.temp_pool);
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
 
     } else {
@@ -534,9 +532,7 @@ ngx_http_geo_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         var->get_handler = ngx_http_geo_cidr_variable;
         var->data = (uintptr_t) geo;
 
-        ngx_dbg_pool_destroy(ctx.temp_pool);
         ngx_destroy_pool(ctx.temp_pool);
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
 
         if (ngx_radix32tree_insert(ctx.tree, 0, 0,

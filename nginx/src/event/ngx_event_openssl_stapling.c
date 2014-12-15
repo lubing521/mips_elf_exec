@@ -714,14 +714,12 @@ ngx_ssl_ocsp_start(void)
 
     ctx = ngx_pcalloc(pool, sizeof(ngx_ssl_ocsp_ctx_t));
     if (ctx == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
 
     log = ngx_palloc(pool, sizeof(ngx_log_t));
     if (log == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -751,7 +749,6 @@ ngx_ssl_ocsp_done(ngx_ssl_ocsp_ctx_t *ctx)
         ngx_close_connection(ctx->peer.connection);
     }
 
-    ngx_dbg_pool_destroy(ctx->pool);
     ngx_destroy_pool(ctx->pool);
 }
 

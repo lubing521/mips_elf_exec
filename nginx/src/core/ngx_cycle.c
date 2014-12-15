@@ -89,7 +89,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     cycle->conf_prefix.len = old_cycle->conf_prefix.len;
     cycle->conf_prefix.data = ngx_pstrdup(pool, &old_cycle->conf_prefix);
     if (cycle->conf_prefix.data == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -97,7 +96,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     cycle->prefix.len = old_cycle->prefix.len;
     cycle->prefix.data = ngx_pstrdup(pool, &old_cycle->prefix);
     if (cycle->prefix.data == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -105,7 +103,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     cycle->conf_file.len = old_cycle->conf_file.len;
     cycle->conf_file.data = ngx_pnalloc(pool, old_cycle->conf_file.len + 1);
     if (cycle->conf_file.data == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -115,7 +112,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     cycle->conf_param.len = old_cycle->conf_param.len;
     cycle->conf_param.data = ngx_pstrdup(pool, &old_cycle->conf_param);
     if (cycle->conf_param.data == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -125,7 +121,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     cycle->paths.elts = ngx_pcalloc(pool, n * sizeof(ngx_path_t *));
     if (cycle->paths.elts == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -149,7 +144,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     if (ngx_list_init(&cycle->open_files, pool, n, sizeof(ngx_open_file_t))
         != NGX_OK)
     {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -169,7 +163,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     if (ngx_list_init(&cycle->shared_memory, pool, n, sizeof(ngx_shm_zone_t))
         != NGX_OK)
     {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -178,7 +171,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     cycle->listening.elts = ngx_pcalloc(pool, n * sizeof(ngx_listening_t));
     if (cycle->listening.elts == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -194,7 +186,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     cycle->conf_ctx = ngx_pcalloc(pool, ngx_max_module * sizeof(void *));
     if (cycle->conf_ctx == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -221,7 +212,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     cycle->hostname.data = ngx_pnalloc(pool, cycle->hostname.len);
     if (cycle->hostname.data == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -238,7 +228,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         if (module->create_conf) {
             rv = module->create_conf(cycle);
             if (rv == NULL) {
-                ngx_dbg_pool_destroy(pool);
                 ngx_destroy_pool(pool);
                 return NULL;
             }
@@ -252,14 +241,12 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     /* STUB: init array ? */
     conf.args = ngx_array_create(pool, 10, sizeof(ngx_str_t));
     if (conf.args == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
 
     conf.temp_pool = ngx_create_pool(NGX_CYCLE_POOL_SIZE, log);
     if (conf.temp_pool == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -319,7 +306,6 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     if (ngx_process == NGX_PROCESS_SIGNALLER) {
         printk("%s-%d\r\n", __FILE__, __LINE__);
         /* ZHAOYAO XXX: 此处释放不用的pool，避免内存泄露 */
-        ngx_dbg_pool_destroy(conf.temp_pool);
         ngx_destroy_pool(conf.temp_pool);
         return cycle;
     }
@@ -765,7 +751,6 @@ old_shm_zone_done:
         }
     }
 
-    ngx_dbg_pool_destroy(conf.temp_pool);
     ngx_destroy_pool(conf.temp_pool);
     conf.temp_pool = NULL;
 
@@ -780,7 +765,6 @@ old_shm_zone_done:
         env = environ;
         environ = senv;
 
-        ngx_dbg_pool_destroy(old_cycle->pool);
         ngx_destroy_pool(old_cycle->pool);
         old_cycle->pool = NULL;
         cycle->old_cycle = NULL;
@@ -976,7 +960,6 @@ void ngx_uninit_cycle(ngx_cycle_t *cycle)
     /* ZHAOYAO XXX: 释放event模块的资源 */
     ngx_done_events(cycle);
 
-    ngx_dbg_pool_destroy(cycle->pool);
     ngx_destroy_pool(cycle->pool);
 
     return;
@@ -986,9 +969,7 @@ void ngx_uninit_cycle(ngx_cycle_t *cycle)
 static void
 ngx_destroy_cycle_pools(ngx_conf_t *conf)
 {
-    ngx_dbg_pool_destroy(conf->temp_pool);
     ngx_destroy_pool(conf->temp_pool);
-    ngx_dbg_pool_destroy(conf->pool);
     ngx_destroy_pool(conf->pool);
 }
 
@@ -1421,7 +1402,6 @@ ngx_clean_old_cycles(ngx_event_t *ev)
 
         ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0, "clean old cycle: %d", i);
 
-        ngx_dbg_pool_destroy(cycle[i]->pool);
         ngx_destroy_pool(cycle[i]->pool);
         cycle[i] = NULL;
     }
@@ -1432,7 +1412,6 @@ ngx_clean_old_cycles(ngx_event_t *ev)
         ngx_add_timer(ev, 30000);
 
     } else {
-        ngx_dbg_pool_destroy(ngx_temp_pool);
         ngx_destroy_pool(ngx_temp_pool);
         ngx_temp_pool = NULL;
         ngx_old_cycles.nelts = 0;

@@ -491,7 +491,6 @@ ngx_close_accepted_connection(ngx_connection_t *c)
     }
 
     if (c->pool) {
-        ngx_dbg_pool_destroy(c->pool);
         ngx_destroy_pool(c->pool);
         c->pool = NULL;
     }

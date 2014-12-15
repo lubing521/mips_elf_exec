@@ -579,7 +579,6 @@ ngx_http_spdy_handle_connection(ngx_http_spdy_connection_t *sc)
         return;
     }
 
-    ngx_dbg_pool_destroy(sc->pool);
     ngx_destroy_pool(sc->pool);
 
     sc->pool = NULL;
@@ -2888,7 +2887,6 @@ ngx_http_spdy_pool_cleanup(void *data)
     ngx_http_spdy_connection_t  *sc = data;
 
     if (sc->pool) {
-        ngx_dbg_pool_destroy(sc->pool);
         ngx_destroy_pool(sc->pool);
     }
 }

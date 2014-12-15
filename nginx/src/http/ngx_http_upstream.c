@@ -3478,7 +3478,6 @@ ngx_http_upstream_next(ngx_http_request_t *r, ngx_http_upstream_t *u,
 #endif
 
         if (u->peer.connection->pool) {
-            ngx_dbg_pool_destroy(u->peer.connection->pool);
             ngx_destroy_pool(u->peer.connection->pool);
         }
 
@@ -3564,7 +3563,6 @@ ngx_http_upstream_finalize_request(ngx_http_request_t *r,
                        u->peer.connection->fd);
 
         if (u->peer.connection->pool) {
-            ngx_dbg_pool_destroy(u->peer.connection->pool);
             ngx_destroy_pool(u->peer.connection->pool);
         }
 

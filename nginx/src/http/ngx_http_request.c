@@ -513,7 +513,6 @@ ngx_http_create_request(ngx_connection_t *c)
 
     r = ngx_pcalloc(pool, sizeof(ngx_http_request_t));
     if (r == NULL) {
-        ngx_dbg_pool_destroy(pool);
         ngx_destroy_pool(pool);
         return NULL;
     }
@@ -540,14 +539,12 @@ ngx_http_create_request(ngx_connection_t *c)
                       sizeof(ngx_table_elt_t))
         != NGX_OK)
     {
-        ngx_dbg_pool_destroy(r->pool);
         ngx_destroy_pool(r->pool);
         return NULL;
     }
 
     r->ctx = ngx_pcalloc(r->pool, sizeof(void *) * ngx_http_max_module);
     if (r->ctx == NULL) {
-        ngx_dbg_pool_destroy(r->pool);
         ngx_destroy_pool(r->pool);
         return NULL;
     }
@@ -557,7 +554,6 @@ ngx_http_create_request(ngx_connection_t *c)
     r->variables = ngx_pcalloc(r->pool, cmcf->variables.nelts
                                         * sizeof(ngx_http_variable_value_t));
     if (r->variables == NULL) {
-        ngx_dbg_pool_destroy(r->pool);
         ngx_destroy_pool(r->pool);
         return NULL;
     }
@@ -3440,7 +3436,6 @@ ngx_http_free_request(ngx_http_request_t *r, ngx_int_t rc)
     pool = r->pool;
     r->pool = NULL;
 
-    ngx_dbg_pool_destroy(pool);
     ngx_destroy_pool(pool);
 }
 
@@ -3492,7 +3487,6 @@ ngx_http_close_connection(ngx_connection_t *c)
 
     ngx_close_connection(c);
 
-    ngx_dbg_pool_destroy(pool);
     ngx_destroy_pool(pool);
 }
 
