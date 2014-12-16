@@ -1,0 +1,167 @@
+#!/bin/bash
+
+export ROOT=$(pwd)
+export TARGET="elf_example"
+export CONFIG_FILE=${ROOT}/.conf_file
+export COMPILE_FLAG_FILE=${ROOT}/.compile_flag_file
+
+export RGOS_ROOT_PATH=
+export RGOS_PROJECT=
+export RGOS_BIN_SYM_TAB=
+
+export MY_SYM_TAB=${ROOT}/symbol_table.txt
+export MY_LOADABLE_PATH=${ROOT}/loadable
+
+
+export CFLAGS='-mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-null-pointer-checks -fno-common -fno-schedule-insns2 -fdata-sections -ffunction-sections -EB -mabi=eabi -mlong32 -msoft-float -march=octeon -mno-octeon-useun -D_MIPS_SZLONG=32 -D_MIPS_SIM=5 -D_MIPS_SZINT=32 -D_MIPS_SZPTR=32 -DUSE_RUNTIME_MODEL_CHECKS=1 -DCVMX_ENABLE_PARAMETER_CHECKING=0  -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -DCVMX_ENABLE_POW_CHECKS=0'
+
+
+# Functions defines here.
+
+function check_valid_RGOS_path {
+    if [ ! -d $1/include ]; then
+        return 1
+    fi
+    if [ ! -d $1/project/main ]; then
+        return 1
+    fi
+    if [ ! -e $1/include/asm ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+function check_valid_RGOS_project {
+    if [ ! -d ${RGOS_ROOT_PATH}/project/main/$1 ]; then
+        return 1
+    fi
+    if [ ! -d ${RGOS_ROOT_PATH}/project/main/$1/build ]; then
+        return 1
+    fi
+    if [ ! -e ${RGOS_BIN_SYM_TAB}]; then
+        return 1
+    fi
+
+    return 0
+}
+
+function clean_clean {
+    # TOOLS come the first
+    cd ${ROOT}/tools
+    make clean
+
+    cd ${ROOT}
+    for x in ${TARGET}; do
+        if [ -d ${ROOT}/${x} ]; then
+            cd ${ROOT}/${x}
+            make clean
+        fi
+    done
+
+    rm -f ${CONFIG_FILE}
+    rm -f ${COMPILE_FLAG_FILE}
+    rm -rf ${MY_LOADABLE_PATH}
+    rm -f ${MY_SYM_TAB}
+}
+
+
+# Main start from here
+case "$1" in
+    reconf)
+        rm -f ${CONFIG_FILE}
+        ;;
+    clean)
+        clean_clean
+        exit 0
+        ;;
+    *)
+        ;;
+esac
+
+if [ ! -e ${CONFIG_FILE} ]; then
+    echo "Please enter the path of RGOS code."
+    read RGOS_ROOT_PATH
+    check_valid_RGOS_path $RGOS_ROOT_PATH
+    if [ $? != 0 ]; then
+        echo "$RGOS_ROOT_PATH is not valid path."
+        exit 1
+    else
+        echo "RGOS root path is $RGOS_ROOT_PATH"
+    fi
+
+    # Translate RGOS root path to abs path
+    if [ "${RGOS_ROOT_PATH:0:1}" != "/" ]; then
+        RGOS_ROOT_PATH=${ROOT}/${RGOS_ROOT_PATH}
+    fi
+
+    all_project=$(ls $RGOS_ROOT_PATH/project/main | grep rsr)
+    echo "All project list below, please make a choice."
+    echo $all_project
+    echo ""
+    read RGOS_PROJECT
+    check_valid_RGOS_project $RGOS_PROJECT
+    if [ $? != 0 ]; then
+        echo "$RGOS_PROJECT is not valid or prepared for generating dynamic loadable object."
+        exit 1
+    fi
+
+    RGOS_BIN_SYM_TAB="${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/build/ngsa-main-${RGOS_PROJECT}.map.sym"
+
+    # Save configurations.
+    touch ${CONFIG_FILE}
+    echo "RGOS_ROOT_PATH=${RGOS_ROOT_PATH}" >> ${CONFIG_FILE}
+    echo "RGOS_PROJECT=${RGOS_PROJECT}" >> ${CONFIG_FILE}
+    echo "RGOS_BIN_SYM_TAB=${RGOS_BIN_SYM_TAB}" >> ${CONFIG_FILE}
+
+    CFLAGS="${CFLAGS} -I ${RGOS_ROOT_PATH}/include -I ${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/conf"
+    rm -f ${COMPILE_FLAG_FILE}
+    touch ${COMPILE_FLAG_FILE}
+    echo "cflags := ${CFLAGS}" >> ${COMPILE_FLAG_FILE}
+else
+    source ${CONFIG_FILE}
+fi
+
+rm -f ${MY_SYM_TAB}
+grep " [TBSADGR] " ${RGOS_BIN_SYM_TAB} > ${MY_SYM_TAB}
+
+
+# TOOLS come the first
+cd ${ROOT}/tools
+make -f Makefile
+
+if [ ! -d ${MY_LOADABLE_PATH} ]; then
+    mkdir -p ${MY_LOADABLE_PATH}
+fi
+
+cd ${ROOT}
+
+for x in ${TARGET}; do
+    if [ -d ${ROOT}/${x} ]; then
+        cd ${ROOT}/${x}
+        echo "Start compile ${x}"
+        make -f Makefile
+    else
+        echo "Not find ${x}"
+    fi
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
