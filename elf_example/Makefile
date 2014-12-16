@@ -1,4 +1,17 @@
+#
+# CC
+# CFLAGS
+# LD
+# LINKFLAGS
+# INS
+# SYM_STUB
+#
+
+
 include ../.compile_flag_file
+
+objects := elf.o util.o
+target := elf
 
 default: gen_sym_stub compile convert link
 
@@ -8,23 +21,23 @@ gen_sym_stub:
 compile:
 	$(CC) $(CFLAGS) -c elf.c -o elf.o
 	$(CC) $(CFLAGS) -c util.c -o util.o
-	$(CC) $(CFLAGS) -c sym_stub.c -o sym_stub.o
-	mv sym_stub.c sym_stub.c.debug
+	$(CC) $(CFLAGS) -c $(SYM_STUB).c -o $(SYM_STUB).o
+	mv $(SYM_STUB).c $(SYM_STUB).c.debug
 
 convert:
-	../tools/converter sym_stub.o
+	../tools/converter $(SYM_STUB).o
 
 link:
-	$(LD) $(LINKFLAGS) elf.o sym_stub.o util.o -o elf
+	$(LD) $(LINKFLAGS) $(objects) $(SYM_STUB).o -o $(target)
 
 probe:
 	$(CC) $(CFLAGS) -c elf.c -o elf.o
 	$(CC) $(CFLAGS) -c util.c -o util.o
-	$(LD) $(LINKFLAGS) elf.o util.o -o elf
+	$(LD) $(LINKFLAGS) $(objects) -o $(target)
 
 install:
-	cp elf $(INS)
+	cp $(target) $(INS)
 
 clean:
-	rm -rf elf.o util.o elf sym_stub.o sym_stub.c*
+	rm -rf $(objects) $(target) $(SYM_STUB).o $(SYM_STUB).c*
 

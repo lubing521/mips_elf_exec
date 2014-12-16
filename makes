@@ -18,6 +18,7 @@ export LD='mipsisa64-octeon-elf-ld'
 export CFLAGS='-mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-null-pointer-checks -fno-common -fno-schedule-insns2 -fdata-sections -ffunction-sections -EB -mabi=eabi -mlong32 -msoft-float -march=octeon -mno-octeon-useun -D_MIPS_SZLONG=32 -D_MIPS_SIM=5 -D_MIPS_SZINT=32 -D_MIPS_SZPTR=32 -DUSE_RUNTIME_MODEL_CHECKS=1 -DCVMX_ENABLE_PARAMETER_CHECKING=0  -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -DCVMX_ENABLE_POW_CHECKS=0'
 export LINKFLAGS="--undefined=dynload_exit --gc-sections -T ${ROOT}/elf.ld"
 export INS=${MY_LOADABLE_PATH}
+export SYM_STUB='sym_stub'
 
 
 # Functions defines here.
@@ -145,6 +146,7 @@ if [ ! -e ${CONFIG_FILE} ]; then
     echo "RGOS_PROJECT=${RGOS_PROJECT}" >> ${CONFIG_FILE}
     echo "RGOS_BIN_SYM_TAB=${RGOS_BIN_SYM_TAB}" >> ${CONFIG_FILE}
 
+    # Generate general part of compile, link, install, clean and so on.
     CFLAGS="${CFLAGS} -I ${RGOS_ROOT_PATH}/include -I ${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/conf"
     rm -f ${COMPILE_FLAG_FILE}
     touch ${COMPILE_FLAG_FILE}
@@ -153,6 +155,7 @@ if [ ! -e ${CONFIG_FILE} ]; then
     echo "LD := ${LD}" >> ${COMPILE_FLAG_FILE}
     echo "LINKFLAGS := ${LINKFLAGS}" >> ${COMPILE_FLAG_FILE}
     echo "INS := ${INS}" >> ${COMPILE_FLAG_FILE}
+    echo "SYM_STUB := ${SYM_STUB}" >> ${COMPILE_FLAG_FILE}
 else
     source ${CONFIG_FILE}
 fi
