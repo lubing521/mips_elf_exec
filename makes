@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export ROOT=$(pwd)
-export TARGET="elf_example"
+export TARGET="elf_example http_download nginx"
 export CONFIG_FILE=${ROOT}/.conf_file
 export COMPILE_FLAG_FILE=${ROOT}/.compile_flag_file
 
@@ -12,8 +12,12 @@ export RGOS_BIN_SYM_TAB=
 export MY_SYM_TAB=${ROOT}/symbol_table.txt
 export MY_LOADABLE_PATH=${ROOT}/loadable
 
-
+# Compile and Link flags
+export CC='mipsisa64-octeon-elf-gcc'
+export LD='mipsisa64-octeon-elf-ld'
 export CFLAGS='-mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-null-pointer-checks -fno-common -fno-schedule-insns2 -fdata-sections -ffunction-sections -EB -mabi=eabi -mlong32 -msoft-float -march=octeon -mno-octeon-useun -D_MIPS_SZLONG=32 -D_MIPS_SIM=5 -D_MIPS_SZINT=32 -D_MIPS_SZPTR=32 -DUSE_RUNTIME_MODEL_CHECKS=1 -DCVMX_ENABLE_PARAMETER_CHECKING=0  -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -DCVMX_ENABLE_POW_CHECKS=0'
+export LINKFLAGS="--undefined=dynload_exit --gc-sections -T ${ROOT}/elf.ld"
+export INS=${MY_LOADABLE_PATH}
 
 
 # Functions defines here.
@@ -47,6 +51,10 @@ function check_valid_RGOS_project {
 }
 
 function clean_clean {
+    if [ ! -e ${COMPILE_FLAG_FILE} ]; then
+        return
+    fi
+
     # TOOLS come the first
     cd ${ROOT}/tools
     make clean
@@ -65,11 +73,28 @@ function clean_clean {
     rm -f ${MY_SYM_TAB}
 }
 
+function install_install {
+    if [ ! -e ${COMPILE_FLAG_FILE} ]; then
+        return
+    fi
+
+    for x in ${TARGET}; do
+        if [ -d ${ROOT}/${x} ]; then
+            cd ${ROOT}/${x}
+            make install
+        fi
+    done
+}
+
 
 # Main start from here
 case "$1" in
     reconf)
         rm -f ${CONFIG_FILE}
+        ;;
+    install)
+        install_install
+        exit 0
         ;;
     clean)
         clean_clean
@@ -96,10 +121,16 @@ if [ ! -e ${CONFIG_FILE} ]; then
     fi
 
     all_project=$(ls $RGOS_ROOT_PATH/project/main | grep rsr)
-    echo "All project list below, please make a choice."
-    echo $all_project
-    echo ""
-    read RGOS_PROJECT
+    echo "All project list below, please make a choice:"
+    index=0
+    for x in ${all_project}; do
+        echo -e "[${index}]\t${x}"
+        let index=index+1
+    done
+    read x
+    read -a all_project <<< ${all_project}
+    choice=${all_project[$x]}
+    RGOS_PROJECT=${choice}
     check_valid_RGOS_project $RGOS_PROJECT
     if [ $? != 0 ]; then
         echo "$RGOS_PROJECT is not valid or prepared for generating dynamic loadable object."
@@ -117,7 +148,11 @@ if [ ! -e ${CONFIG_FILE} ]; then
     CFLAGS="${CFLAGS} -I ${RGOS_ROOT_PATH}/include -I ${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/conf"
     rm -f ${COMPILE_FLAG_FILE}
     touch ${COMPILE_FLAG_FILE}
-    echo "cflags := ${CFLAGS}" >> ${COMPILE_FLAG_FILE}
+    echo "CC := ${CC}" >> ${COMPILE_FLAG_FILE}
+    echo "CFLAGS := ${CFLAGS}" >> ${COMPILE_FLAG_FILE}
+    echo "LD := ${LD}" >> ${COMPILE_FLAG_FILE}
+    echo "LINKFLAGS := ${LINKFLAGS}" >> ${COMPILE_FLAG_FILE}
+    echo "INS := ${INS}" >> ${COMPILE_FLAG_FILE}
 else
     source ${CONFIG_FILE}
 fi

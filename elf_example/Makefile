@@ -6,22 +6,25 @@ gen_sym_stub:
 	../tools/gen_sym_stub
 
 compile:
-	mipsisa64-octeon-elf-gcc $(cflags) -c elf.c -o elf.o
-	mipsisa64-octeon-elf-gcc $(cflags) -c util.c -o util.o
-	mipsisa64-octeon-elf-gcc $(cflags) -c sym_stub.c -o sym_stub.o
+	$(CC) $(CFLAGS) -c elf.c -o elf.o
+	$(CC) $(CFLAGS) -c util.c -o util.o
+	$(CC) $(CFLAGS) -c sym_stub.c -o sym_stub.o
 	mv sym_stub.c sym_stub.c.debug
 
 convert:
 	../tools/converter sym_stub.o
 
 link:
-	mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections -T ../elf.ld elf.o sym_stub.o util.o -o elf
+	$(LD) $(LINKFLAGS) elf.o sym_stub.o util.o -o elf
 
 probe:
-	mipsisa64-octeon-elf-gcc $(cflags) -c elf.c -o elf.o
-	mipsisa64-octeon-elf-gcc $(cflags) -c util.c -o util.o
-	mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections -T ../elf.ld elf.o util.o -o elf
-	
+	$(CC) $(CFLAGS) -c elf.c -o elf.o
+	$(CC) $(CFLAGS) -c util.c -o util.o
+	$(LD) $(LINKFLAGS) elf.o util.o -o elf
+
+install:
+	cp elf $(INS)
 
 clean:
 	rm -rf elf.o util.o elf sym_stub.o sym_stub.c*
+

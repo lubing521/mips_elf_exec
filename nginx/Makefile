@@ -1,9 +1,4 @@
-CFLAGS := -mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-delete-null-pointer-checks -fno-common -fno-schedule-insns2 -fdata-sections -ffunction-sections -EB -mabi=eabi -mlong32 -msoft-float -march=octeon -mno-octeon-useun -D_MIPS_SZLONG=32 -D_MIPS_SIM=5 -D_MIPS_SZINT=32 -D_MIPS_SZPTR=32 -DUSE_RUNTIME_MODEL_CHECKS=1 -DCVMX_ENABLE_PARAMETER_CHECKING=0 -DCVMX_ENABLE_CSR_ADDRESS_CHECKING=0 -DCVMX_ENABLE_POW_CHECKS=0
-
-CFLAGS += -I ../../10_4_3b13_cache/include -I ../../10_4_3b13_cache/project/main/rsr1002e-rsr2004e/conf -I std
-
-CC = mipsisa64-octeon-elf-gcc
-LINK = mipsisa64-octeon-elf-ld --undefined=dynload_exit --gc-sections
+include ../.compile_flag_file
 
 default: gen_sym_stub convert link
 
@@ -16,6 +11,9 @@ convert:
 	../tools/converter sym_stub.o
 
 probe: compile fake_link
+
+install:
+	cp nginx $(INS)
 
 clean:
 	rm -f `find . -name "*.o"`
@@ -108,6 +106,7 @@ HTTP_DEPS = src/http/ngx_http.h \
 			src/http/modules/ngx_http_ssi_filter_module.h
 
 HTTP_INCS = -I src/http \
+			-I std \
 			-I src/http/modules
 
 all_objects :=	src/core/nginx.o \
@@ -246,14 +245,14 @@ all_objects :=	src/core/nginx.o \
 compile: $(all_objects)
 
 link:
-	$(LINK) -o nginx \
-	-T ../elf.ld \
+	$(LD) -o nginx \
+	$(LINKFLAGS) \
 	sym_stub.o \
 	$(all_objects)
 
 fake_link:
-	$(LINK) -o nginx \
-	-T ../elf.ld \
+	$(LD) -o nginx \
+	$(LINKFLAGS) \
 	$(all_objects)
 
 ngx_modules.o:	$(CORE_DEPS) \
@@ -1034,24 +1033,24 @@ src/http/modules/ngx_http_getfile_module.o:	$(CORE_DEPS) $(HTTP_DEPS) \
 
 
 zlib/adler32.o: zlib/adler32.c
-	$(CC) -c $(CFLAGS) -o zlib/adler32.o zlib/adler32.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/adler32.o zlib/adler32.c
 
 zlib/compress.o: zlib/compress.c
-	$(CC) -c $(CFLAGS) -o zlib/compress.o zlib/compress.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/compress.o zlib/compress.c
 
 zlib/zutil.o: zlib/zutil.c
-	$(CC) -c $(CFLAGS) -o zlib/zutil.o zlib/zutil.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/zutil.o zlib/zutil.c
 
 zlib/uncompr.o: zlib/uncompr.c
-	$(CC) -c $(CFLAGS) -o zlib/uncompr.o zlib/uncompr.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/uncompr.o zlib/uncompr.c
 
 
 zlib/trees.o: zlib/trees.c
-	$(CC) -c $(CFLAGS) -o zlib/trees.o zlib/trees.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/trees.o zlib/trees.c
 
 
 zlib/inftrees.o: zlib/inftrees.c
-	$(CC) -c $(CFLAGS) -o zlib/inftrees.o zlib/inftrees.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/inftrees.o zlib/inftrees.c
 
 
 zlib/minigzip.o: zlib/minigzip.c
@@ -1059,43 +1058,43 @@ zlib/minigzip.o: zlib/minigzip.c
 
 
 zlib/inflate.o: zlib/inflate.c
-	$(CC) -c $(CFLAGS) -o zlib/inflate.o zlib/inflate.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/inflate.o zlib/inflate.c
 
 
 zlib/inffast.o: zlib/inffast.c
-	$(CC) -c $(CFLAGS) -o zlib/inffast.o zlib/inffast.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/inffast.o zlib/inffast.c
 
 
 zlib/infback.o: zlib/infback.c
-	$(CC) -c $(CFLAGS) -o zlib/infback.o zlib/infback.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/infback.o zlib/infback.c
 
 
 zlib/gzwrite.o: zlib/gzwrite.c
-	$(CC) -c $(CFLAGS) -o zlib/gzwrite.o zlib/gzwrite.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/gzwrite.o zlib/gzwrite.c
 
 
 zlib/gzread.o: zlib/gzread.c
-	$(CC) -c $(CFLAGS) -o zlib/gzread.o zlib/gzread.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/gzread.o zlib/gzread.c
 
 
 zlib/gzlib.o: zlib/gzlib.c
-	$(CC) -c $(CFLAGS) -o zlib/gzlib.o zlib/gzlib.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/gzlib.o zlib/gzlib.c
 
 
 zlib/gzclose.o: zlib/gzclose.c
-	$(CC) -c $(CFLAGS) -o zlib/gzclose.o zlib/gzclose.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/gzclose.o zlib/gzclose.c
 
 
 zlib/example.o: zlib/example.c
-	$(CC) -c $(CFLAGS) -o zlib/example.o zlib/example.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/example.o zlib/example.c
 
 
 zlib/deflate.o: zlib/deflate.c
-	$(CC) -c $(CFLAGS) -o zlib/deflate.o zlib/deflate.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/deflate.o zlib/deflate.c
 
 
 zlib/crc32.o: zlib/crc32.c
-	$(CC) -c $(CFLAGS) -o zlib/crc32.o zlib/crc32.c
+	$(CC) -c $(CFLAGS) -I std -o zlib/crc32.o zlib/crc32.c
 
 
 http-snooping/http-snooping.o: http-snooping/http-snooping.c
