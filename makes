@@ -105,6 +105,10 @@ case "$1" in
         ;;
 esac
 
+if [ ! -e ${COMPILE_FLAG_FILE} ]; then
+    rm -f ${CONFIG_FILE}
+fi
+
 if [ ! -e ${CONFIG_FILE} ]; then
     echo "Please enter the path of RGOS code."
     read RGOS_ROOT_PATH
