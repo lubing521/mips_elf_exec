@@ -19,6 +19,9 @@ export CFLAGS='-mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-de
 export LINKFLAGS="--undefined=dynload_exit --gc-sections -T ${ROOT}/elf.ld"
 export INS=${MY_LOADABLE_PATH}
 export SYM_STUB='sym_stub'
+export MK_FILE='.mk.temp'
+export MK_HEAD=${ROOT}/mk.head
+export MK_TAIL=${ROOT}/mk.tail
 
 
 # Functions defines here.
@@ -64,7 +67,8 @@ function clean_clean {
     for x in ${TARGET}; do
         if [ -d ${ROOT}/${x} ]; then
             cd ${ROOT}/${x}
-            make clean
+            make -f ${MK_FILE} clean
+            rm -f ${MK_FILE}
         fi
     done
 
@@ -82,7 +86,7 @@ function install_install {
     for x in ${TARGET}; do
         if [ -d ${ROOT}/${x} ]; then
             cd ${ROOT}/${x}
-            make install
+            make -f ${MK_FILE} install
         fi
     done
 }
@@ -181,9 +185,16 @@ cd ${ROOT}
 
 for x in ${TARGET}; do
     if [ -d ${ROOT}/${x} ]; then
-        cd ${ROOT}/${x}
-        echo "Start compile ${x}"
-        make -f Makefile
+        if [ -f ${ROOT}/${x}/Makefile ]; then
+            cd ${ROOT}/${x}
+            echo "Start compile ${x}"
+            rm -f ${MK_FILE}
+            touch ${MK_FILE}
+            cat ${MK_HEAD} Makefile ${MK_TAIL} >> ${MK_FILE}
+            make -f ${MK_FILE}
+        else
+            echo "Not fine Makefile"
+        fi
     else
         echo "Not find ${x}"
     fi

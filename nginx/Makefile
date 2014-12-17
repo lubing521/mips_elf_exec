@@ -1,5 +1,3 @@
-include ../.compile_flag_file
-
 OBJ_CORE := ngx_modules.o \
 	src/core/nginx.o \
 	src/core/ngx_log.o \
@@ -142,22 +140,6 @@ OBJ_STD := std/stdlib.o
 objects := $(OBJ_CORE) $(OBJ_EVENT) $(OBJ_OS) $(OBJ_HTTP) $(OBJ_ZLIB) $(OBJ_SP) $(OBJ_SPC) $(OBJ_AVL) $(OBJ_STD)
 target := nginx
 
-default: gen_sym_stub stub link
-
-gen_sym_stub:
-	../tools/gen_sym_stub
-
-stub:
-	$(CC) $(CFLAGS) -c $(SYM_STUB).c -o $(SYM_STUB).o
-	mv $(SYM_STUB).c $(SYM_STUB).c.debug
-	../tools/converter $(SYM_STUB).o
-
-link: $(objects)
-	$(LD) $(LINKFLAGS) $(objects) $(SYM_STUB).o -o $(target)
-
-probe: $(objects)
-	$(LD) $(LINKFLAGS) $(objects) -o $(target)
-
 INCS_BASE := -I ./ -I std
 INCS_HTTP := -I src/http -I src/http/modules
 
@@ -179,11 +161,3 @@ $(OBJ_SP) $(OBJ_SPC): %.o: %.c
 
 $(OBJ_STD): %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
-
-.PHONY: install clean
-
-install:
-	cp $(target) $(INS)
-
-clean:
-	rm -rf $(objects) $(target) $(SYM_STUB).*

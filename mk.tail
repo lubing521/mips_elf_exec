@@ -1,0 +1,23 @@
+# 不要编辑本文件
+
+gen_sym_stub:
+	../tools/gen_sym_stub
+
+stub:
+	$(CC) $(CFLAGS) -c $(SYM_STUB).c -o $(SYM_STUB).o
+	mv $(SYM_STUB).c $(SYM_STUB).c.debug
+	../tools/converter $(SYM_STUB).o
+
+link: $(objects)
+	$(LD) $(LINKFLAGS) $(objects) $(SYM_STUB).o -o $(target)
+
+probe: $(objects)
+	$(LD) $(LINKFLAGS) $(objects) -o $(target)
+
+.PHONY: install clean
+
+install:
+	cp $(target) $(INS)
+
+clean:
+	rm -rf $(objects) $(target) $(SYM_STUB).*

@@ -3,7 +3,7 @@
 STUB_CODE="sym_stub.c"
 STUB_CODE_TEMP="$STUB_CODE.temp"
 
-all_sym=$(make probe 2>&1 | grep "undefined reference to" | awk '{print $5}' | sort -u | sed "s/'//g" | sed "s/\`//g")
+all_sym=$(make -f .mk.temp probe 2>&1 | grep "undefined reference to" | awk '{print $5}' | sort -u | sed "s/'//g" | sed "s/\`//g")
 
 rm -f $STUB_CODE_TEMP
 

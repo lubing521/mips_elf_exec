@@ -7,3 +7,4 @@
 !*/
 !.gitignore
 !/tools/gen_sym_stub
+!mk.*
