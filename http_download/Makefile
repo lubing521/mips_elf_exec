@@ -1,27 +1,31 @@
 include ../.compile_flag_file
 
-default: gen_sym_stub compile convert link
+objects := http_download.o
+target := http_download
+
+default: gen_sym_stub stub link
 
 gen_sym_stub:
 	../tools/gen_sym_stub
 
-compile:
-	$(CC) $(CFLAGS) -c http_download.c -o http_download.o
-	$(CC) $(CFLAGS) -c sym_stub.c -o sym_stub.o
-	mv sym_stub.c sym_stub.c.debug
+stub:
+	$(CC) $(CFLAGS) -c $(SYM_STUB).c -o $(SYM_STUB).o
+	mv $(SYM_STUB).c $(SYM_STUB).c.debug
+	../tools/converter $(SYM_STUB).o
 
-convert:
-	../tools/converter sym_stub.o
+link: $(objects)
+	$(LD) $(LINKFLAGS) $(objects) $(SYM_STUB).o -o $(target)
 
-link:
-	$(LD) $(LINKFLAGS) http_download.o sym_stub.o -o http_download
+probe: $(objects)
+	$(LD) $(LINKFLAGS) $(objects) -o $(target)
 
-probe:
-	$(CC) $(CFLAGS) -c http_download.c -o http_download.o
-	$(LD) $(LINKFLAGS) http_download.o -o http_download
+$(objects): %.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: install clean
 
 install:
-	cp http_download $(INS)
+	cp $(target) $(INS)
 
 clean:
-	rm -rf http_download.o http_download sym_stub.o sym_stub.c*
+	rm -rf $(objects) $(target) $(SYM_STUB).*

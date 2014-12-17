@@ -154,6 +154,7 @@ if [ ! -e ${CONFIG_FILE} ]; then
     CFLAGS="${CFLAGS} -I ${RGOS_ROOT_PATH}/include -I ${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/conf"
     rm -f ${COMPILE_FLAG_FILE}
     touch ${COMPILE_FLAG_FILE}
+    echo "RGOS_ROOT_PATH := ${RGOS_ROOT_PATH}" >> ${COMPILE_FLAG_FILE}
     echo "CC := ${CC}" >> ${COMPILE_FLAG_FILE}
     echo "CFLAGS := ${CFLAGS}" >> ${COMPILE_FLAG_FILE}
     echo "LD := ${LD}" >> ${COMPILE_FLAG_FILE}
