@@ -3,7 +3,6 @@
 export ROOT=$(pwd)
 export TARGET="elf_example http_download nginx"
 export CONFIG_FILE=${ROOT}/.conf_file
-export COMPILE_FLAG_FILE=${ROOT}/.compile_flag_file
 
 export RGOS_ROOT_PATH=
 export RGOS_PROJECT=
@@ -19,6 +18,8 @@ export CFLAGS='-mlong-calls -G 0 -fno-builtin  -nostdinc -pipe -Wall -O2 -fno-de
 export LINKFLAGS="--undefined=dynload_exit --gc-sections -T ${ROOT}/elf.ld"
 export INS=${MY_LOADABLE_PATH}
 export SYM_STUB='sym_stub'
+export STUB_CODE=${SYM_STUB}.c
+export STUB_CODE_TEMP=${STUB_CODE}.temp
 export MK_FILE='.mk.temp'
 export MK_HEAD=${ROOT}/mk.head
 export MK_TAIL=${ROOT}/mk.tail
@@ -55,10 +56,6 @@ function check_valid_RGOS_project {
 }
 
 function clean_clean {
-    if [ ! -e ${COMPILE_FLAG_FILE} ]; then
-        return
-    fi
-
     # TOOLS come the first
     cd ${ROOT}/tools
     make clean
@@ -73,16 +70,11 @@ function clean_clean {
     done
 
     rm -f ${CONFIG_FILE}
-    rm -f ${COMPILE_FLAG_FILE}
     rm -rf ${MY_LOADABLE_PATH}
     rm -f ${MY_SYM_TAB}
 }
 
 function install_install {
-    if [ ! -e ${COMPILE_FLAG_FILE} ]; then
-        return
-    fi
-
     for x in ${TARGET}; do
         if [ -d ${ROOT}/${x} ]; then
             cd ${ROOT}/${x}
@@ -108,10 +100,6 @@ case "$1" in
     *)
         ;;
 esac
-
-if [ ! -e ${COMPILE_FLAG_FILE} ]; then
-    rm -f ${CONFIG_FILE}
-fi
 
 if [ ! -e ${CONFIG_FILE} ]; then
     echo "Please enter the path of RGOS code."
@@ -154,17 +142,7 @@ if [ ! -e ${CONFIG_FILE} ]; then
     echo "RGOS_PROJECT=${RGOS_PROJECT}" >> ${CONFIG_FILE}
     echo "RGOS_BIN_SYM_TAB=${RGOS_BIN_SYM_TAB}" >> ${CONFIG_FILE}
 
-    # Generate general part of compile, link, install, clean and so on.
     CFLAGS="${CFLAGS} -I ${RGOS_ROOT_PATH}/include -I ${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/conf"
-    rm -f ${COMPILE_FLAG_FILE}
-    touch ${COMPILE_FLAG_FILE}
-    echo "RGOS_ROOT_PATH := ${RGOS_ROOT_PATH}" >> ${COMPILE_FLAG_FILE}
-    echo "CC := ${CC}" >> ${COMPILE_FLAG_FILE}
-    echo "CFLAGS := ${CFLAGS}" >> ${COMPILE_FLAG_FILE}
-    echo "LD := ${LD}" >> ${COMPILE_FLAG_FILE}
-    echo "LINKFLAGS := ${LINKFLAGS}" >> ${COMPILE_FLAG_FILE}
-    echo "INS := ${INS}" >> ${COMPILE_FLAG_FILE}
-    echo "SYM_STUB := ${SYM_STUB}" >> ${COMPILE_FLAG_FILE}
 else
     source ${CONFIG_FILE}
 fi

@@ -1,6 +1,4 @@
 # 不要编辑本文件
 
-include ../.compile_flag_file
-
 default: gen_sym_stub stub link
 
