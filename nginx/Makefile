@@ -1,6 +1,6 @@
 include ../.compile_flag_file
 
-CORE_OBJ := ngx_modules.o \
+OBJ_CORE := ngx_modules.o \
 	src/core/nginx.o \
 	src/core/ngx_log.o \
 	src/core/ngx_palloc.o \
@@ -32,7 +32,7 @@ CORE_OBJ := ngx_modules.o \
 	src/core/ngx_crypt.o \
 	src/core/ngx_regex.o
 
-EVENT_OBJ := src/event/ngx_event.o \
+OBJ_EVENT := src/event/ngx_event.o \
 	src/event/ngx_event_timer.o \
 	src/event/ngx_event_posted.o \
 	src/event/ngx_event_busy_lock.o \
@@ -41,7 +41,7 @@ EVENT_OBJ := src/event/ngx_event.o \
 	src/event/ngx_event_pipe.o \
 	src/event/modules/ngx_select_module.o
 
-OS_OBJ := src/os/unix/ngx_time.o \
+OBJ_OS := src/os/unix/ngx_time.o \
 	src/os/unix/ngx_errno.o \
 	src/os/unix/ngx_alloc.o \
 	src/os/unix/ngx_files.o \
@@ -61,7 +61,7 @@ OS_OBJ := src/os/unix/ngx_time.o \
 	src/os/unix/ngx_process_cycle.o \
 	src/os/unix/ngx_linux_sendfile_chain.o
 
-HTTP_OBJ := src/http/ngx_http.o \
+OBJ_HTTP := src/http/ngx_http.o \
 	src/http/ngx_http_core_module.o \
 	src/http/ngx_http_special_response.o \
 	src/http/ngx_http_request.o \
@@ -108,7 +108,7 @@ HTTP_OBJ := src/http/ngx_http.o \
 	src/http/modules/ngx_http_upstream_ip_hash_module.o \
 	src/http/modules/ngx_http_getfile_module.o
 
-ZLIB_OBJ := zlib/adler32.o \
+OBJ_ZLIB := zlib/adler32.o \
 	zlib/compress.o \
 	zlib/crc32.o \
 	zlib/deflate.o \
@@ -125,9 +125,9 @@ ZLIB_OBJ := zlib/adler32.o \
 	zlib/minigzip.o \
 	zlib/zutil.o
 
-SP_OBJ := http-snooping/http-snooping.o
+OBJ_SP := http-snooping/http-snooping.o
 
-SPC_OBJ := snoop_client/ngx_sc_sohu.o \
+OBJ_SPC := snoop_client/ngx_sc_sohu.o \
 	snoop_client/ngx_sc_util.o \
 	snoop_client/ngx_sc_youku.o \
 	snoop_client/ngx_snoop_client.o \
@@ -135,11 +135,11 @@ SPC_OBJ := snoop_client/ngx_sc_sohu.o \
 	snoop_client/yk_player_plugin.o \
 	snoop_client/yk_lib.o
 
-AVL_OBJ := avllib/avlLib.o avllib/strtod.o
+OBJ_AVL := avllib/avlLib.o avllib/strtod.o
 
-STD_OBJ := std/stdlib.o
+OBJ_STD := std/stdlib.o
 
-objects := $(CORE_OBJ) $(EVENT_OBJ) $(OS_OBJ) $(HTTP_OBJ) $(ZLIB_OBJ) $(SP_OBJ) $(SPC_OBJ) $(AVL_OBJ) $(STD_OBJ)
+objects := $(OBJ_CORE) $(OBJ_EVENT) $(OBJ_OS) $(OBJ_HTTP) $(OBJ_ZLIB) $(OBJ_SP) $(OBJ_SPC) $(OBJ_AVL) $(OBJ_STD)
 target := nginx
 
 default: gen_sym_stub stub link
@@ -158,26 +158,26 @@ link: $(objects)
 probe: $(objects)
 	$(LD) $(LINKFLAGS) $(objects) -o $(target)
 
-BASE_INCS := -I ./ -I std
-HTTP_INCS := -I src/http -I src/http/modules
+INCS_BASE := -I ./ -I std
+INCS_HTTP := -I src/http -I src/http/modules
 
-SP_INCS := $(HTTP_INCS) -I $(RGOS_ROOT_PATH)/app/wtot/r_tcp/include
-CORE_INCS := $(BASE_INCS) \
+INCS_SP := $(INCS_HTTP) -I $(RGOS_ROOT_PATH)/app/wtot/r_tcp/include
+INCS_CORE := $(INCS_BASE) \
 		   -I src/core \
 		   -I src/event \
 		   -I src/event/modules \
 		   -I src/os/unix
 
-$(CORE_OBJ) $(EVENT_OBJ) $(OS_OBJ) $(ZLIB_OBJ) $(AVL_OBJ): %.o: %.c
-	$(CC) $(CFLAGS) $(CORE_INCS) -c $< -o $@
+$(OBJ_CORE) $(OBJ_EVENT) $(OBJ_OS) $(OBJ_ZLIB) $(OBJ_AVL): %.o: %.c
+	$(CC) $(CFLAGS) $(INCS_CORE) -c $< -o $@
 
-$(HTTP_OBJ): %.o: %.c
-	$(CC) $(CFLAGS) $(CORE_INCS) $(HTTP_INCS) -c $< -o $@
+$(OBJ_HTTP): %.o: %.c
+	$(CC) $(CFLAGS) $(INCS_CORE) $(INCS_HTTP) -c $< -o $@
 
-$(SP_OBJ) $(SPC_OBJ): %.o: %.c
-	$(CC) $(CFLAGS) $(CORE_INCS) $(SP_INCS) -c $< -o $@
+$(OBJ_SP) $(OBJ_SPC): %.o: %.c
+	$(CC) $(CFLAGS) $(INCS_CORE) $(INCS_SP) -c $< -o $@
 
-$(STD_OBJ): %.o: %.c
+$(OBJ_STD): %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: install clean
