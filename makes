@@ -2,7 +2,7 @@
 
 export ROOT=$(pwd)
 export TARGET="elf_example http_download nginx"
-export CONFIG_FILE=${ROOT}/.conf_file
+export CONFIG_FILE=${ROOT}/.conf
 
 export RGOS_ROOT_PATH=
 export RGOS_PROJECT=
@@ -20,9 +20,15 @@ export INS=${MY_LOADABLE_PATH}
 export SYM_STUB='sym_stub'
 export STUB_CODE=${SYM_STUB}.c
 export STUB_CODE_TEMP=${STUB_CODE}.temp
+export STUB_CODE_DBG=${STUB_CODE}.debug
+export STUB_OBJECT=${SYM_STUB}.o
 export MK_FILE='.mk.temp'
 export MK_HEAD=${ROOT}/mk.head
 export MK_TAIL=${ROOT}/mk.tail
+
+# Tools
+export GEN_SYM=${ROOT}/tools/gen_sym_stub
+export CONVERT_SYM=${ROOT}/tools/converter
 
 
 # Functions defines here.
@@ -45,10 +51,13 @@ function check_valid_RGOS_project {
     if [ ! -d ${RGOS_ROOT_PATH}/project/main/$1 ]; then
         return 1
     fi
+
     if [ ! -d ${RGOS_ROOT_PATH}/project/main/$1/build ]; then
         return 1
     fi
-    if [ ! -e ${RGOS_BIN_SYM_TAB}]; then
+
+    RGOS_BIN_SYM_TAB="${RGOS_ROOT_PATH}/project/main/$1/build/ngsa-main-$1.map.sym"
+    if [ ! -e ${RGOS_BIN_SYM_TAB} ]; then
         return 1
     fi
 
@@ -56,6 +65,10 @@ function check_valid_RGOS_project {
 }
 
 function clean_clean {
+    if [ ! -f ${CONFIG_FILE} ]; then
+        return 0
+    fi
+
     # TOOLS come the first
     cd ${ROOT}/tools
     make clean
@@ -75,6 +88,10 @@ function clean_clean {
 }
 
 function install_install {
+    if [ ! -f ${CONFIG_FILE} ]; then
+        return 0
+    fi
+
     for x in ${TARGET}; do
         if [ -d ${ROOT}/${x} ]; then
             cd ${ROOT}/${x}
@@ -134,18 +151,16 @@ if [ ! -e ${CONFIG_FILE} ]; then
         exit 1
     fi
 
-    RGOS_BIN_SYM_TAB="${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/build/ngsa-main-${RGOS_PROJECT}.map.sym"
 
     # Save configurations.
     touch ${CONFIG_FILE}
     echo "RGOS_ROOT_PATH=${RGOS_ROOT_PATH}" >> ${CONFIG_FILE}
     echo "RGOS_PROJECT=${RGOS_PROJECT}" >> ${CONFIG_FILE}
-    echo "RGOS_BIN_SYM_TAB=${RGOS_BIN_SYM_TAB}" >> ${CONFIG_FILE}
-
-    CFLAGS="${CFLAGS} -I ${RGOS_ROOT_PATH}/include -I ${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/conf"
 else
     source ${CONFIG_FILE}
 fi
+
+CFLAGS="${CFLAGS} -I ${RGOS_ROOT_PATH}/include -I ${RGOS_ROOT_PATH}/project/main/${RGOS_PROJECT}/conf"
 
 rm -f ${MY_SYM_TAB}
 grep " [TBSADGR] " ${RGOS_BIN_SYM_TAB} > ${MY_SYM_TAB}
