@@ -8,3 +8,4 @@
 !.gitignore
 !/tools/gen_sym_stub
 !Rules.make
+!ModuleTop.make
