@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export ROOT=$(pwd)
-export TARGET="elf_example http_download"
+export TARGET="elf_example http_download nginx"
 export CONFIG_FILE=${ROOT}/.conf
 
 export RGOS_ROOT_PATH=

@@ -7,17 +7,23 @@ unexport extra_include
 unexport extra_cflags
 unexport extra_linkflags
 
+subdir_obj := $(join $(subdir-y), $(patsubst %,/_sub_%.o,$(notdir $(subdir-y))))
+
 
 # 连接成部分.o
-$(O_TARGET): $(obj-y)
-	$(LD) -r $(obj-y) -o $@
+$(O_TARGET): $(obj-y) $(subdir_obj)
+	$(LD) -r $(obj-y) $(subdir_obj) -o $@
 ifeq ($(DYNLD_TARGET_ROOT), $(shell pwd))
 	make final
 endif
 
 # 编译所有.o
 $(obj-y):%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(extra_include) -c $< -o $@
+
+# 编译所有子文件下的.o
+$(subdir_obj):
+	make -C $(dir $@)
 
 
 .PHONY: final gen_sym_stub link probe install clean
