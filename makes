@@ -152,6 +152,7 @@ if [ ! -e ${CONFIG_FILE} ]; then
     touch ${CONFIG_FILE}
     echo "RGOS_ROOT_PATH=${RGOS_ROOT_PATH}" >> ${CONFIG_FILE}
     echo "RGOS_PROJECT=${RGOS_PROJECT}" >> ${CONFIG_FILE}
+    echo "RGOS_BIN_SYM_TAB=${RGOS_BIN_SYM_TAB}" >> ${CONFIG_FILE}
 else
     source ${CONFIG_FILE}
 fi
