@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export ROOT=$(pwd)
-export TARGET="elf_example http_download nginx"
+export TARGET="elf_example http_download"
 export CONFIG_FILE=${ROOT}/.conf
 
 export RGOS_ROOT_PATH=
@@ -22,9 +22,6 @@ export STUB_CODE=${SYM_STUB}.c
 export STUB_CODE_TEMP=${STUB_CODE}.temp
 export STUB_CODE_DBG=${STUB_CODE}.debug
 export STUB_OBJECT=${SYM_STUB}.o
-export MK_FILE='.mk.temp'
-export MK_HEAD=${ROOT}/mk.head
-export MK_TAIL=${ROOT}/mk.tail
 
 # Tools
 export GEN_SYM=${ROOT}/tools/gen_sym_stub
@@ -77,8 +74,7 @@ function clean_clean {
     for x in ${TARGET}; do
         if [ -d ${ROOT}/${x} ]; then
             cd ${ROOT}/${x}
-            make -f ${MK_FILE} clean
-            rm -f ${MK_FILE}
+            make clean
         fi
     done
 
@@ -95,7 +91,7 @@ function install_install {
     for x in ${TARGET}; do
         if [ -d ${ROOT}/${x} ]; then
             cd ${ROOT}/${x}
-            make -f ${MK_FILE} install
+            make install
         fi
     done
 }
@@ -181,10 +177,7 @@ for x in ${TARGET}; do
         if [ -f ${ROOT}/${x}/Makefile ]; then
             cd ${ROOT}/${x}
             echo "Start compile ${x}"
-            rm -f ${MK_FILE}
-            touch ${MK_FILE}
-            cat ${MK_HEAD} Makefile ${MK_TAIL} >> ${MK_FILE}
-            make -f ${MK_FILE}
+            make
         else
             echo "Not fine Makefile"
         fi

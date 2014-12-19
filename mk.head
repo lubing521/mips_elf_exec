@@ -1,4 +1,0 @@
-# 不要编辑本文件
-
-default: gen_sym_stub stub link
-

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-all_sym=$(make -f ${MK_FILE} probe 2>&1 | grep "undefined reference to" | awk '{print $5}' | sort -u | sed "s/'//g" | sed "s/\`//g")
+all_sym=$(make probe 2>&1 | grep "undefined reference to" | awk '{print $5}' | sort -u | sed "s/'//g" | sed "s/\`//g")
 
 rm -f $STUB_CODE_TEMP
 

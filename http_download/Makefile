@@ -1,5 +1,13 @@
-objects := http_download.o
-target := http_download
+unexport DYNLD_TARGET_ROOT
+unexport DYNLD_TARGET
+export DYNLD_TARGET_ROOT := $(shell pwd)
 
-$(objects): %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+export DYNLD_TARGET := http_download
+
+O_TARGET := _sub_http_download.o
+
+obj-y := http_download.o
+
+
+include $(ROOT)/Rules.make
+

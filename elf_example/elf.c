@@ -21,8 +21,10 @@ void dynload_entry()
     int nb;
     struct sockaddr_in sa;
     void *ptr;
+    int i;
 
     printk("hehehehehehehehhehe\r\n");
+    i = dlmax(1, 2);
 
     memset(&sa, 0, sizeof(sa));
     ret = inet_pton(AF_INET, host, &sa.sin_addr);
